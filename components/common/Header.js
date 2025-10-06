@@ -20,10 +20,13 @@ import {
   ShoppingCart,
   LocationOn,
   Home,
+  PersonOutline,
 } from '@mui/icons-material';
 import { styled, alpha } from '@mui/material/styles';
 import { useState } from 'react';
 import Image from 'next/image';
+import { useAuth } from '@/context';
+import { useRouter } from 'next/navigation';
 
 // Styled components
 const SearchBar = styled('div')(({ theme }) => ({
@@ -60,6 +63,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function Header() {
+  const { auth, logout } = useAuth();
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleProfileMenuOpen = (event) => {
@@ -67,6 +72,11 @@ export default function Header() {
   };
 
   const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleNavigate = (path) => {
+    router.push(path);
     setAnchorEl(null);
   };
 
@@ -81,133 +91,124 @@ export default function Header() {
           backdropFilter: 'blur(20px)',
         }}
       >
-        <Container maxWidth="xl">
-          <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
-            {/* Logo Section */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Image src="/logo-color.png" width={100} height={50} alt="logo" />
+        <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
+          {/* Logo Section */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Image src="/logo-color.png" width={100} height={50} alt="logo" />
 
-              {/* Navigation Links */}
-              <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
-                <Button
-                  color="inherit"
-                  sx={{
-                    fontWeight: 600,
-                    '&:hover': {
-                      backgroundColor: 'rgba(0,0,0,0.04)',
-                      transform: 'translateY(-1px)',
-                    },
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  Hotels
-                </Button>
-                <Button
-                  color="inherit"
-                  sx={{
-                    fontWeight: 600,
-                    '&:hover': {
-                      backgroundColor: 'rgba(0,0,0,0.04)',
-                      transform: 'translateY(-1px)',
-                    },
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  Villas
-                </Button>
-                <Button
-                  color="inherit"
-                  sx={{
-                    fontWeight: 600,
-                    '&:hover': {
-                      backgroundColor: 'rgba(0,0,0,0.04)',
-                      transform: 'translateY(-1px)',
-                    },
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  Experiences
-                </Button>
-              </Box>
+            {/* Navigation Links */}
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
+              <Button
+                color="inherit"
+                sx={{
+                  fontWeight: 600,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0,0,0,0.04)',
+                    transform: 'translateY(-1px)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                Hotels
+              </Button>
+              <Button
+                color="inherit"
+                sx={{
+                  fontWeight: 600,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0,0,0,0.04)',
+                    transform: 'translateY(-1px)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                Villas
+              </Button>
+              <Button
+                color="inherit"
+                sx={{
+                  fontWeight: 600,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0,0,0,0.04)',
+                    transform: 'translateY(-1px)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                Experiences
+              </Button>
             </Box>
+          </Box>
 
-            {/* Search Bar */}
-            <Box
+          {/* Search Bar */}
+          <Box
+            sx={{
+              display: { xs: 'none', lg: 'flex' },
+              flex: 1,
+              maxWidth: '500px',
+              mx: 4,
+            }}
+          >
+            <SearchBar>
+              <SearchIconWrapper>
+                <Search />
+              </SearchIconWrapper>
+              <StyledInputBase
+                placeholder="Search hotels, destinations..."
+                inputProps={{ 'aria-label': 'search' }}
+              />
+            </SearchBar>
+          </Box>
+
+          {/* Action Icons */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {/* Location Button */}
+            <Button
+              startIcon={<LocationOn />}
               sx={{
-                display: { xs: 'none', lg: 'flex' },
-                flex: 1,
-                maxWidth: '500px',
-                mx: 4,
+                display: { xs: 'none', sm: 'flex' },
+                color: 'text.primary',
+                borderRadius: '20px',
+                px: 2,
               }}
             >
-              <SearchBar>
-                <SearchIconWrapper>
-                  <Search />
-                </SearchIconWrapper>
-                <StyledInputBase
-                  placeholder="Search hotels, destinations..."
-                  inputProps={{ 'aria-label': 'search' }}
-                />
-              </SearchBar>
-            </Box>
+              New York
+            </Button>
 
-            {/* Action Icons */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {/* Location Button */}
-              <Button
-                startIcon={<LocationOn />}
-                sx={{
-                  display: { xs: 'none', sm: 'flex' },
-                  color: 'text.primary',
-                  borderRadius: '20px',
-                  px: 2,
-                }}
-              >
-                New York
-              </Button>
+            {/* Favorite Icon */}
+            <IconButton
+              onClick={() => {
+                if (auth.user) {
+                  handleNavigate('/user/favorites');
+                } else {
+                  handleNavigate('/signin');
+                }
+              }}
+              sx={{
+                color: 'text.primary',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,107,107,0.1)',
+                  transform: 'scale(1.1)',
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              <Badge badgeContent={auth.user ? 2 : 0} color="error">
+                <FavoriteBorder />
+              </Badge>
+            </IconButton>
 
-              {/* Favorite Icon */}
-              <IconButton
-                sx={{
-                  color: 'text.primary',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,107,107,0.1)',
-                    transform: 'scale(1.1)',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <Badge badgeContent={2} color="error">
-                  <FavoriteBorder />
-                </Badge>
-              </IconButton>
-
-              {/* Cart Icon */}
-              <IconButton
-                sx={{
-                  color: 'text.primary',
-                  '&:hover': {
-                    backgroundColor: 'rgba(78,205,196,0.1)',
-                    transform: 'scale(1.1)',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <Badge badgeContent={1} color="error">
-                  <ShoppingCart />
-                </Badge>
-              </IconButton>
-
-              {/* Profile Avatar */}
-              <IconButton
-                onClick={handleProfileMenuOpen}
-                sx={{
-                  '&:hover': {
-                    transform: 'scale(1.1)',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
+            {/* Profile Avatar */}
+            <IconButton
+              onClick={handleProfileMenuOpen}
+              sx={{
+                '&:hover': {
+                  transform: 'scale(1.1)',
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {auth.user ? (
                 <Avatar
                   sx={{
                     width: 32,
@@ -216,22 +217,52 @@ export default function Header() {
                     fontSize: '14px',
                   }}
                 >
-                  U
+                  {auth.user.name?.charAt(0).toUpperCase() || 'U'}
                 </Avatar>
-              </IconButton>
+              ) : (
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    bgcolor: 'grey.400',
+                  }}
+                >
+                  <PersonOutline fontSize="small" />
+                </Avatar>
+              )}
+            </IconButton>
 
+            {/* Menu (depends on auth status) */}
+
+            {auth.user ? (
+              <>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  <MenuItem onClick={() => handleNavigate('/user/profile')}>
+                    Profile
+                  </MenuItem>
+                  <MenuItem onClick={() => handleNavigate('/user/bookings')}>
+                    My Bookings
+                  </MenuItem>
+                  <MenuItem onClick={logout}>Logout</MenuItem>{' '}
+                </Menu>
+              </>
+            ) : (
               <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
               >
-                <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-                <MenuItem onClick={handleMenuClose}>My Bookings</MenuItem>
-                <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+                <MenuItem onClick={() => handleNavigate('/signin')}>
+                  Login / Signup
+                </MenuItem>{' '}
               </Menu>
-            </Box>
-          </Toolbar>
-        </Container>
+            )}
+          </Box>
+        </Toolbar>
       </AppBar>
     </>
   );

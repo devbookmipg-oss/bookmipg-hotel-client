@@ -33,7 +33,7 @@ export async function GET(req) {
 
   await redis.set(otpKey, otp, { ex: 300 }); // 5 minutes
 
-  const message = `Your One-Time Password (OTP) for is ${otp}. Please do not share this code with anyone. It is valid for 2 minutes -RETARM`;
+  const message = `Dear customer, use this One Time Password ${otp} to log in to your Bookmipg Hotel account. This OTP will be valid for the next 5 mins.`;
   const SMSAPIKEY = process.env.ACCOUNT_KEY;
   const SMSSENDERID = process.env.SENDER_ID;
   const SMSTEMPLATEID = process.env.OTP_TEMPLATE_ID;

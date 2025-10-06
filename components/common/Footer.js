@@ -48,7 +48,7 @@ const MobileNavWrapper = styled(Paper)(({ theme }) => ({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 60,
+    height: 70,
     backdropFilter: 'blur(10px)', // glass effect
     backgroundColor: 'rgba(28,28,30,0.95)',
     borderTop: '1px solid rgba(255,255,255,0.2)',

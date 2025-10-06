@@ -382,7 +382,7 @@ export default function SearchBarComponent() {
           'url(https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)',
         backgroundPosition: 'center',
         backgroundSize: 'cover',
-        height: isMobile ? 300 : 500,
+        height: isMobile ? 400 : 500,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -429,41 +429,45 @@ export default function SearchBarComponent() {
           alignItems: 'center',
         }}
       >
-        {/* Main Title */}
-        <Fade in timeout={800}>
-          <Typography
-            variant={isMobile ? 'h6' : 'h4'}
-            fontWeight="bold"
-            textAlign="center"
-            color="white"
-            gutterBottom
-            sx={{
-              textShadow: '0 4px 12px rgba(0,0,0,0.5)',
-              mb: 1,
-            }}
-          >
-            Discover Your Perfect Escape
-          </Typography>
-        </Fade>
+        {!isMobile && (
+          <>
+            {/* Main Title */}
+            <Fade in timeout={800}>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                textAlign="center"
+                color="white"
+                gutterBottom
+                sx={{
+                  textShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                  mb: 1,
+                }}
+              >
+                Discover Your Perfect Escape
+              </Typography>
+            </Fade>
 
-        {/* Subtitle */}
-        <Fade in timeout={1000}>
-          <Typography
-            variant={isMobile ? 'body1' : 'h6'}
-            textAlign="center"
-            color="rgba(255,255,255,0.9)"
-            gutterBottom
-            sx={{
-              textShadow: '0 2px 8px rgba(0,0,0,0.5)',
-              mb: 4,
-              maxWidth: '600px',
-              mx: 'auto',
-            }}
-          >
-            Find amazing deals on hotels, resorts, and vacation rentals
-            worldwide
-          </Typography>
-        </Fade>
+            {/* Subtitle */}
+            <Fade in timeout={1000}>
+              <Typography
+                variant="h6"
+                textAlign="center"
+                color="rgba(255,255,255,0.9)"
+                gutterBottom
+                sx={{
+                  textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                  mb: 4,
+                  maxWidth: '600px',
+                  mx: 'auto',
+                }}
+              >
+                Find amazing deals on hotels, resorts, and vacation rentals
+                worldwide
+              </Typography>
+            </Fade>
+          </>
+        )}
 
         {/* Search Card */}
         <Fade in timeout={1200}>
@@ -471,7 +475,7 @@ export default function SearchBarComponent() {
             elevation={8}
             sx={{
               p: isMobile ? 2 : 3,
-              width: isMobile ? '100%' : '80%',
+              width: isMobile ? '90%' : '80%',
               borderRadius: 4,
               background: 'rgba(255, 255, 255, 0.95)',
               backdropFilter: 'blur(20px)',
@@ -497,7 +501,7 @@ export default function SearchBarComponent() {
               <Box
                 sx={{
                   flex: isMobile ? 'auto' : 1,
-                  p: 2,
+                  p: 1,
                   cursor: 'pointer',
                   borderRight: isMobile ? 'none' : '1px solid',
                   borderBottom: isMobile ? '1px solid' : 'none',
@@ -546,7 +550,7 @@ export default function SearchBarComponent() {
               <Box
                 sx={{
                   flex: isMobile ? 'auto' : 1,
-                  p: 2,
+                  p: 1,
                   cursor: 'pointer',
                   borderRight: isMobile ? 'none' : '1px solid',
                   borderBottom: isMobile ? '1px solid' : 'none',
@@ -597,9 +601,11 @@ export default function SearchBarComponent() {
               <Box
                 sx={{
                   flex: isMobile ? 'auto' : 0.8,
-                  p: 2,
+                  p: 1,
                   cursor: 'pointer',
                   width: isMobile ? '100%' : 'auto',
+                  borderBottom: isMobile ? '1px solid' : 'none',
+                  borderColor: 'divider',
                   borderRadius: isMobile ? 2 : 0,
                   '&:hover': {
                     bgcolor: 'grey.50',
