@@ -193,7 +193,7 @@ export default function Header() {
                 transition: 'all 0.3s ease',
               }}
             >
-              <Badge badgeContent={auth.user ? 2 : 0} color="error">
+              <Badge badgeContent={0} color="error">
                 <FavoriteBorder />
               </Badge>
             </IconButton>

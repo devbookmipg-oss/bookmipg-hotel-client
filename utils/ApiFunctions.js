@@ -1,21 +1,12 @@
-import { BASEURL } from '@/config/MainApi';
+import { BASEURL, fetcher } from '@/config/MainApi';
 import useSWR from 'swr';
 import axios from 'axios';
 
 // fetch data list
-export const GetDataList = ({ auth, endPoint }) => {
-  const apiUrl = `${BASEURL}/${endPoint}?sort=id:DESC&filters[$and][0][hotel_id][$eq]=${auth?.user?.hotel_id}&populate=*`;
-
+export const GetDataList = ({ endPoint }) => {
   const { data } = useSWR(
-    apiUrl,
-    async (url) => {
-      const res = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
-      return res.data.data;
-    },
+    `${BASEURL}/${endPoint}?sort=id:DESC&populate=*`,
+    fetcher,
     {
       refreshInterval: 500,
       revalidateOnFocus: true,
@@ -25,76 +16,45 @@ export const GetDataList = ({ auth, endPoint }) => {
 };
 
 // get single data
-export const GetSingleData = ({ auth, endPoint, id }) => {
-  const { data } = useSWR(
-    `${BASEURL}/${endPoint}/${id}?populate=*`,
-    async (url) => {
-      const res = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
-      const result = await res.data.data;
-      return result;
-    },
-    {
-      refreshInterval: 500,
-      revalidateOnFocus: true,
-    }
-  );
+export const GetSingleData = ({ endPoint, id }) => {
+  const { data } = useSWR(`${BASEURL}/${endPoint}/${id}?populate=*`, fetcher, {
+    refreshInterval: 500,
+    revalidateOnFocus: true,
+  });
   return data;
 };
 
 // create new data
-export const CreateNewData = async ({ auth, endPoint, payload }) => {
+export const CreateNewData = async ({ endPoint, payload }) => {
   const res = await axios.post(`${BASEURL}/${endPoint}`, payload, {
     headers: {
-      Authorization: `Bearer ${auth.token}`,
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
     },
   });
   return res;
 };
 
 // create update data
-export const UpdateData = async ({ auth, endPoint, id, payload }) => {
+export const UpdateData = async ({ endPoint, id, payload }) => {
   const res = await axios.put(`${BASEURL}/${endPoint}/${id}`, payload, {
     headers: {
-      Authorization: `Bearer ${auth.token}`,
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
     },
   });
   return res;
 };
 
 // delete data
-export const DeleteData = async ({ auth, endPoint, id }) => {
+export const DeleteData = async ({ endPoint, id }) => {
   const res = await axios.delete(`${BASEURL}/${endPoint}/${id}`, {
     headers: {
-      Authorization: `Bearer ${auth.token}`,
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
     },
   });
   return res;
 };
 
-export const GetUserList = ({ auth }) => {
-  const apiUrl = `${BASEURL}/users?populate=*`;
-
-  const { data } = useSWR(
-    apiUrl,
-    async (url) => {
-      const res = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
-      return res.data;
-    },
-    {
-      refreshInterval: 500,
-      revalidateOnFocus: true,
-    }
-  );
-  const filteredData = data?.filter((item) => {
-    return item?.hotel_id === auth?.user?.hotel_id;
-  });
-  return filteredData;
+export const GetUserList = () => {
+  const { data } = useSWR(`${BASEURL}/customers?populate=*`, fetcher);
+  return data;
 };
