@@ -14,6 +14,7 @@ import {
   Grid,
   Avatar,
   Stack,
+  MenuItem,
 } from '@mui/material';
 import {
   Phone,
@@ -25,6 +26,7 @@ import {
   PersonOutline,
   Email,
   Cake,
+  Wc,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import useSWR from 'swr';
@@ -52,7 +54,7 @@ export default function LoginPage() {
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
-    dob: '',
+    gender: '',
   });
 
   const customers = GetUserList();
@@ -79,7 +81,7 @@ export default function LoginPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const searchUser = () => customers?.find((a) => a.mobile == phoneNumber);
+  const searchUser = () => customers?.find((a) => a.phone == phoneNumber);
 
   const handleSendOtp = async () => {
     if (!phoneNumber.trim()) return setError('Please enter your phone number');
@@ -155,7 +157,6 @@ export default function LoginPage() {
         }
         setSuccess('Login successful! Redirecting...');
         const result = {
-          jwt: 'my-token',
           user: { id: user.documentId, name: user.name, phone: user.phone },
         };
         setCookie(null, 'user', JSON.stringify(result.user), {
@@ -164,7 +165,7 @@ export default function LoginPage() {
         });
         dispatchAuth({
           type: 'LOGIN_SUCCESS',
-          payload: { token: result.token, user: result.user },
+          payload: { user: result.user },
         });
         setTimeout(() => router.push('/'), 1000);
       } else {
@@ -189,13 +190,13 @@ export default function LoginPage() {
     setError('');
     try {
       const res = await CreateNewData({
-        endPoint: 'customers',
+        endPoint: 'online-users',
         payload: {
           data: {
             name: newUser.name,
-            email: newUser.email || null,
-            dob: newUser.dob || null,
-            mobile: phoneNumber,
+            email: newUser.email || '',
+            gender: newUser.gender || '',
+            phone: phoneNumber,
           },
         },
       });
@@ -512,27 +513,30 @@ export default function LoginPage() {
                   sx={{ mb: 2 }}
                 />
                 <TextField
+                  select
                   fullWidth
-                  label="Date of Birth"
-                  type="date"
-                  value={newUser.dob}
+                  label="Gender"
+                  type="gender"
+                  value={newUser.gender}
                   onChange={(e) =>
-                    setNewUser({ ...newUser, dob: e.target.value })
+                    setNewUser({ ...newUser, gender: e.target.value })
                   }
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Cake sx={{ color: 'white' }} />
+                        <Wc sx={{ color: 'white' }} />
                       </InputAdornment>
                     ),
                     sx: { color: 'white' },
                   }}
-                  InputLabelProps={{
-                    shrink: true,
-                    sx: { color: 'rgba(255,255,255,0.8)' },
-                  }}
-                  sx={{ mb: 3 }}
-                />
+                  InputLabelProps={{ sx: { color: 'rgba(255,255,255,0.8)' } }}
+                  sx={{ mb: 2 }}
+                >
+                  <MenuItem value="">Select Gender</MenuItem>
+                  <MenuItem value="Male">Male</MenuItem>
+                  <MenuItem value="Female">Female</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
+                </TextField>
 
                 <Button
                   fullWidth

@@ -12,6 +12,8 @@ import {
   Avatar,
   InputBase,
   Container,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   Search,
@@ -21,7 +23,13 @@ import {
   LocationOn,
   Home,
   PersonOutline,
+  BookOnline,
+  Settings,
+  Logout,
+  PhoneAndroid,
+  EmailOutlined,
 } from '@mui/icons-material';
+
 import { styled, alpha } from '@mui/material/styles';
 import { useState } from 'react';
 import Image from 'next/image';
@@ -162,9 +170,22 @@ export default function Header() {
 
           {/* Action Icons */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {/* Location Button */}
+            {/* email */}
             <Button
-              startIcon={<LocationOn />}
+              startIcon={<EmailOutlined />}
+              sx={{
+                display: { xs: 'none', sm: 'flex' },
+                color: 'text.primary',
+                borderRadius: '20px',
+                px: 2,
+                textTransform: 'none',
+              }}
+            >
+              info@bookmipg.com
+            </Button>
+            {/* Phone */}
+            <Button
+              startIcon={<PhoneAndroid />}
               sx={{
                 display: { xs: 'none', sm: 'flex' },
                 color: 'text.primary',
@@ -172,7 +193,7 @@ export default function Header() {
                 px: 2,
               }}
             >
-              New York
+              +91 888 888 8888
             </Button>
 
             {/* Favorite Icon */}
@@ -241,13 +262,33 @@ export default function Header() {
                   open={Boolean(anchorEl)}
                   onClose={handleMenuClose}
                 >
-                  <MenuItem onClick={() => handleNavigate('/user/profile')}>
-                    Profile
-                  </MenuItem>
                   <MenuItem onClick={() => handleNavigate('/user/bookings')}>
-                    My Bookings
+                    <ListItemIcon>
+                      <BookOnline fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary="My Bookings" />
                   </MenuItem>
-                  <MenuItem onClick={logout}>Logout</MenuItem>{' '}
+
+                  <MenuItem onClick={() => handleNavigate('/user/wishlist')}>
+                    <ListItemIcon>
+                      <FavoriteBorder fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary="My Wishlist" />
+                  </MenuItem>
+
+                  <MenuItem onClick={() => handleNavigate('/user/profile')}>
+                    <ListItemIcon>
+                      <Settings fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary="Profile Settings" />
+                  </MenuItem>
+
+                  <MenuItem onClick={logout}>
+                    <ListItemIcon>
+                      <Logout fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary="Logout" />
+                  </MenuItem>
                 </Menu>
               </>
             ) : (

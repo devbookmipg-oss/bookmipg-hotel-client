@@ -9,7 +9,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <GlobalProvider>{children}</GlobalProvider>
+        <GlobalProvider>
+          {children} <ToastContainer />
+        </GlobalProvider>
       </body>
     </html>
   );

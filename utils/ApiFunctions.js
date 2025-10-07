@@ -55,6 +55,6 @@ export const DeleteData = async ({ endPoint, id }) => {
 };
 
 export const GetUserList = () => {
-  const { data } = useSWR(`${BASEURL}/customers?populate=*`, fetcher);
+  const { data } = useSWR(`${BASEURL}/online-users?populate=*`, fetcher);
   return data;
 };
