@@ -11,7 +11,7 @@ export const GetTodaysDate = () => {
     month = '0' + month;
   }
 
-  let dateString = year + '-' + month + '-' + day;
+  let dateString = year + '/' + month + '/' + day;
   let dateObject = {
     year,
     month,
@@ -33,14 +33,18 @@ export const GetCustomDate = (date) => {
   const dayStr = day < 10 ? '0' + day : day;
   const monthStr = month < 10 ? '0' + month : month;
 
-  return `${dayStr}-${monthStr}-${year}`;
+  return `${dayStr}/${monthStr}/${year}`;
 };
 
 export function getNextMonthDate(dateString) {
   const date = new Date(dateString); // local time
   const nextMonth = date.getMonth() + 1;
 
-  const lastDayOfNextMonth = new Date(date.getFullYear(), nextMonth + 1, 0).getDate();
+  const lastDayOfNextMonth = new Date(
+    date.getFullYear(),
+    nextMonth + 1,
+    0
+  ).getDate();
 
   const newDay = Math.min(date.getDate(), lastDayOfNextMonth);
   const nextMonthDate = new Date(date.getFullYear(), nextMonth, newDay);
@@ -50,7 +54,7 @@ export function getNextMonthDate(dateString) {
   const month = String(nextMonthDate.getMonth() + 1).padStart(2, '0');
   const day = String(nextMonthDate.getDate()).padStart(2, '0');
 
-  return `${year}-${month}-${day}T00:00:00.000Z`;
+  return `${year}/${month}/${day}T00:00:00.000Z`;
 }
 
 // get todays date

@@ -6,15 +6,23 @@ import {
   QuickCategoriesGrid,
   SearchBarComponent,
 } from '@/components/homePageComp';
+import { GetDataList } from '@/utils/ApiFunctions';
 
 const Page = () => {
+  const locations = GetDataList({
+    endPoint: 'locations',
+  });
+
+  const hotels = GetDataList({
+    endPoint: 'hotels',
+  });
   return (
     <>
       <Header />
-      <SearchBarComponent />
+      <SearchBarComponent locations={locations} />
 
       <QuickCategoriesGrid />
-      <FeaturedPropertiesCarousel />
+      <FeaturedPropertiesCarousel hotels={hotels} />
       <Footer />
     </>
   );

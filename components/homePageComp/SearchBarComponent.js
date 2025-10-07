@@ -11,6 +11,8 @@ import {
   Fade,
   useTheme,
   useMediaQuery,
+  Autocomplete,
+  Snackbar,
 } from '@mui/material';
 import {
   Search,
@@ -24,17 +26,25 @@ import {
   Apartment,
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
+import { GetCustomDate } from '@/utils/DateFetcher';
+import { useRouter } from 'next/navigation';
 
-export default function SearchBarComponent() {
+export default function SearchBarComponent({ locations }) {
+  const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+
+  const today = new Date();
+  const tomorrow = new Date();
+  tomorrow.setDate(today.getDate() + 1);
+
+  const formatDate = (date) => date.toISOString().split('T')[0]; // yyyy-mm-dd format for input[type="date"]
 
   const [searchData, setSearchData] = useState({
     location: '',
-    checkIn: '',
-    checkOut: '',
-    guests: '2 Guests, 0 Children',
+    checkIn: formatDate(today),
+    checkOut: formatDate(tomorrow),
+    guests: '2 Adults, 0 Children',
   });
   const [anchorEl, setAnchorEl] = useState(null);
   const [activeField, setActiveField] = useState(null);
@@ -62,138 +72,92 @@ export default function SearchBarComponent() {
 
   const open = Boolean(anchorEl);
 
-  const popularLocations = [
-    { name: 'New York, USA', type: 'City', icon: '🏙️' },
-    { name: 'Bali, Indonesia', type: 'Beach', icon: '🏖️' },
-    { name: 'Paris, France', type: 'Romantic', icon: '💖' },
-    { name: 'Tokyo, Japan', type: 'City', icon: '🗼' },
-    { name: 'Dubai, UAE', type: 'Luxury', icon: '⭐' },
-    { name: 'London, UK', type: 'City', icon: '🇬🇧' },
-  ];
+  const [snackbar, setSnackbar] = useState({ open: false, message: '' });
 
-  const propertyTypes = [
-    { name: 'Hotels', icon: <Hotel />, count: '2.4M+' },
-    { name: 'Villas', icon: <Villa />, count: '450K+' },
-    { name: 'Resorts', icon: '🏨', count: '180K+' },
-    { name: 'Apartments', icon: <Apartment />, count: '1.2M+' },
-  ];
+  const showError = (message) => {
+    setSnackbar({ open: true, message });
+    setTimeout(() => setSnackbar({ open: false, message: '' }), 3000);
+  };
 
-  const quickDates = [
-    { label: 'This Weekend', value: 'weekend' },
-    { label: 'Next Week', value: 'next_week' },
-    { label: 'Next Month', value: 'next_month' },
-    { label: 'Flexible Dates', value: 'flexible' },
-  ];
+  const handleSearch = () => {
+    const { location, checkIn, checkOut } = searchData;
+
+    if (!location) return showError('Please select a location');
+    if (!checkIn) return showError('Please select a check-in date');
+    if (!checkOut) return showError('Please select a check-out date');
+    if (new Date(checkOut) <= new Date(checkIn))
+      return showError('Check-out date must be after check-in');
+    if (adults < 1) return showError('At least one adult is required');
+
+    router.push(
+      `/hotels?location=${encodeURIComponent(
+        location
+      )}&checkin=${checkIn}&checkout=${checkOut}&adults=${adults}&children=${children}`
+    );
+  };
 
   const renderPopoverContent = () => {
     switch (activeField) {
       case 'location':
         return (
-          <Box sx={{ p: 2, width: isMobile ? 280 : 350 }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              🌍 Where do you want to go?
-            </Typography>
-
-            {/* Current Location */}
-            <Box
-              onClick={() => {
-                setSearchData({ ...searchData, location: 'Current Location' });
-                handleClose();
+          <Box sx={{ p: 1, width: isMobile ? 280 : 350 }}>
+            {/* Searchable Location Dropdown */}
+            <Autocomplete
+              freeSolo
+              options={locations || []}
+              getOptionLabel={(option) => option.city || option.name || ''}
+              onChange={(e, value) => {
+                if (value) {
+                  setSearchData({
+                    ...searchData,
+                    location: value.city || value.name,
+                  });
+                  handleClose();
+                }
               }}
-              sx={{
-                p: 2,
-                cursor: 'pointer',
-                borderRadius: 2,
-                bgcolor: 'primary.light',
-                color: 'primary.main',
-                mb: 2,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                fontWeight: 'bold',
-              }}
-            >
-              <MyLocation />
-              Use current location
-            </Box>
-
-            {/* Popular Destinations */}
-            <Typography
-              variant="subtitle1"
-              fontWeight="bold"
-              gutterBottom
-              sx={{ mt: 2 }}
-            >
-              Trending Destinations
-            </Typography>
-            <Box
-              sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}
-            >
-              {popularLocations.map((location, index) => (
+              renderOption={(props, option) => (
                 <Box
-                  key={index}
-                  onClick={() => {
-                    setSearchData({ ...searchData, location: location.name });
-                    handleClose();
-                  }}
+                  component="li"
+                  {...props}
                   sx={{
-                    p: 1.5,
-                    cursor: 'pointer',
-                    borderRadius: 2,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    textAlign: 'center',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      bgcolor: 'primary.light',
-                      borderColor: 'primary.main',
-                      transform: 'translateY(-2px)',
-                    },
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    py: 1,
+                    px: 1.5,
+                    '&:hover': { bgcolor: 'grey.100' },
                   }}
                 >
-                  <Typography variant="h5" sx={{ mb: 0.5 }}>
-                    {location.icon}
-                  </Typography>
-                  <Typography variant="body2" fontWeight="medium">
-                    {location.name.split(',')[0]}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {location.type}
-                  </Typography>
+                  <LocationOn color="primary" fontSize="small" />
+                  <Box>
+                    <Typography fontWeight="medium">{option.city}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {option.state}, {option.pincode}
+                    </Typography>
+                  </Box>
                 </Box>
-              ))}
-            </Box>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Search city or hotel name"
+                  fullWidth
+                  variant="outlined"
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 3,
+                    },
+                  }}
+                />
+              )}
+            />
           </Box>
         );
 
       case 'dates':
         return (
-          <Box sx={{ p: 2, width: isMobile ? 300 : 400 }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              📅 Select Dates
-            </Typography>
-
-            {/* Quick Date Selection */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Quick selection
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                {quickDates.map((date, index) => (
-                  <Chip
-                    key={index}
-                    label={date.label}
-                    variant="outlined"
-                    onClick={() => {
-                      // Handle quick date selection
-                      handleClose();
-                    }}
-                    sx={{ borderRadius: 2 }}
-                  />
-                ))}
-              </Box>
-            </Box>
-
+          <Box sx={{ p: 1, width: isMobile ? 300 : 400 }}>
             {/* Date Pickers */}
             <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
               <TextField
@@ -246,11 +210,7 @@ export default function SearchBarComponent() {
 
       case 'guests':
         return (
-          <Box sx={{ p: 2, width: isMobile ? 280 : 320 }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              👥 Guests & Rooms
-            </Typography>
-
+          <Box sx={{ p: 1, width: isMobile ? 280 : 320 }}>
             {/* Adults Counter */}
             <Box
               sx={{
@@ -592,7 +552,9 @@ export default function SearchBarComponent() {
                   }}
                 >
                   {searchData.checkIn && searchData.checkOut
-                    ? `${searchData.checkIn} - ${searchData.checkOut}`
+                    ? `${GetCustomDate(searchData.checkIn)} - ${GetCustomDate(
+                        searchData.checkOut
+                      )}`
                     : 'Add dates'}
                 </Typography>
               </Box>
@@ -638,6 +600,7 @@ export default function SearchBarComponent() {
 
               {/* Search Button */}
               <Button
+                onClick={handleSearch}
                 variant="contained"
                 sx={{
                   minWidth: 'auto',
@@ -704,6 +667,11 @@ export default function SearchBarComponent() {
           }
         }
       `}</style>
+      <Snackbar
+        open={snackbar.open}
+        message={snackbar.message}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      />
     </Box>
   );
 }

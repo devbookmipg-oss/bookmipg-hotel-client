@@ -11,8 +11,10 @@ import {
   Rating,
 } from '@mui/material';
 import { Favorite, FavoriteBorder, LocationOn } from '@mui/icons-material';
+import { useRouter } from 'next/navigation';
 
-export default function FeaturedPropertiesCarousel() {
+export default function FeaturedPropertiesCarousel({ hotels }) {
+  const router = useRouter();
   const [favorites, setFavorites] = useState(new Set());
 
   const featuredProperties = [
@@ -64,6 +66,18 @@ export default function FeaturedPropertiesCarousel() {
       discount: '18% OFF',
       amenities: ['Private Pool', 'Butler', 'Beach', 'Luxury Spa'],
     },
+    {
+      id: 5,
+      name: 'Luxury Beach Resort & Spa',
+      location: 'Bali, Indonesia',
+      price: 289,
+      originalPrice: 359,
+      rating: 4.8,
+      reviewCount: 1247,
+      image: '/hotel/1.jpg',
+      discount: '20% OFF',
+      amenities: ['Free WiFi', 'Pool', 'Spa', 'Breakfast'],
+    },
   ];
 
   const toggleFavorite = (propertyId) => {
@@ -114,7 +128,7 @@ export default function FeaturedPropertiesCarousel() {
       }}
     >
       <Slider {...settings}>
-        {featuredProperties.map((property) => (
+        {hotels?.slice(0, 10).map((property) => (
           <Box
             key={property.id}
             sx={{
@@ -138,22 +152,10 @@ export default function FeaturedPropertiesCarousel() {
               <Box
                 sx={{
                   height: { xs: 160, sm: 180 },
-                  background: `url(${property.image}) center/cover`,
+                  background: `url(${property?.banner_image?.url}) center/cover`,
                   position: 'relative',
                 }}
               >
-                <Chip
-                  label={property.discount}
-                  size="small"
-                  sx={{
-                    position: 'absolute',
-                    top: 12,
-                    left: 12,
-                    bgcolor: 'error.main',
-                    color: 'white',
-                    fontWeight: 'bold',
-                  }}
-                />
                 <IconButton
                   onClick={() => toggleFavorite(property.id)}
                   sx={{
@@ -165,7 +167,7 @@ export default function FeaturedPropertiesCarousel() {
                   }}
                   size="small"
                 >
-                  {favorites.has(property.id) ? (
+                  {favorites.has(property.documentId) ? (
                     <Favorite color="error" />
                   ) : (
                     <FavoriteBorder />
@@ -184,18 +186,19 @@ export default function FeaturedPropertiesCarousel() {
                     sx={{ fontSize: 16, color: 'text.secondary', mr: 0.5 }}
                   />
                   <Typography variant="body2" color="text.secondary" noWrap>
-                    {property.location}
+                    {property?.hotel_address_line1}, {property?.hotel_district},{' '}
+                    {property?.hotel_state}
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Rating value={property.rating} readOnly size="small" />
+                  <Rating value={property.rating || 4} readOnly size="small" />
                   <Typography
                     variant="body2"
                     color="text.secondary"
                     sx={{ ml: 1 }}
                   >
-                    {property.rating} ({property.reviewCount})
+                    {property.rating || 0} ({property.reviewCount || 0})
                   </Typography>
                 </Box>
 
@@ -205,7 +208,7 @@ export default function FeaturedPropertiesCarousel() {
                   {property.amenities.slice(0, 3).map((amenity, idx) => (
                     <Chip
                       key={idx}
-                      label={amenity}
+                      label={amenity.title}
                       size="small"
                       variant="outlined"
                       sx={{ fontSize: '0.7rem', height: 24 }}
@@ -230,14 +233,14 @@ export default function FeaturedPropertiesCarousel() {
                 >
                   <Box>
                     <Typography variant="h6" fontWeight="bold" color="primary">
-                      ${property.price}
+                      ₹{property.price || 0.0}
                       <Typography
                         component="span"
                         variant="body2"
                         color="text.secondary"
                         sx={{ textDecoration: 'line-through', ml: 1 }}
                       >
-                        ${property.originalPrice}
+                        ₹{property.originalPrice || 0}
                       </Typography>
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -245,6 +248,9 @@ export default function FeaturedPropertiesCarousel() {
                     </Typography>
                   </Box>
                   <Button
+                    onClick={() =>
+                      router.push(`/hotels/${property.documentId}`)
+                    }
                     variant="contained"
                     size="small"
                     sx={{
