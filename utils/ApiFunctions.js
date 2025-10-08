@@ -5,7 +5,7 @@ import axios from 'axios';
 // fetch data list
 export const GetDataList = ({ endPoint }) => {
   const { data } = useSWR(
-    `${BASEURL}/${endPoint}?sort=id:DESC&populate=*`,
+    `${BASEURL}/${endPoint}?sort=createdAt:desc&populate=*`,
     fetcher,
     {
       refreshInterval: 500,
