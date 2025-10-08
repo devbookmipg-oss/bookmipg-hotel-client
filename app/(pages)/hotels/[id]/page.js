@@ -201,10 +201,10 @@ export default function HotelDetailsPage() {
         </Container>
       </Box>
 
-      <Container maxWidth="lg" sx={{ px: isMobile ? 2 : 3 }}>
+      <Container maxWidth="xl" sx={{ px: isMobile ? 2 : 3 }}>
         <Grid container spacing={4}>
           {/* Main Content */}
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             {/* Hotel Header */}
             <Box sx={{ mb: 4 }}>
               <Box
@@ -510,22 +510,8 @@ export default function HotelDetailsPage() {
           </Grid>
 
           {/* Booking Sidebar - Sticky on desktop, fixed bottom on mobile */}
-          <Grid item xs={12} md={4}>
-            <Box
-              sx={{
-                position: isMobile ? 'fixed' : 'sticky',
-                bottom: isMobile ? 0 : 100,
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-                ...(isMobile && {
-                  background: 'white',
-                  boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
-                  borderTopLeftRadius: 16,
-                  borderTopRightRadius: 16,
-                }),
-              }}
-            >
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Box>
               <Paper
                 sx={{
                   p: 3,

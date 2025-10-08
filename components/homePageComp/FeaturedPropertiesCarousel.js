@@ -233,14 +233,14 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
                 >
                   <Box>
                     <Typography variant="h6" fontWeight="bold" color="primary">
-                      ₹{property.price || 0.0}
+                      ₹{property.discounted_base_price || 'N/A'}
                       <Typography
                         component="span"
                         variant="body2"
                         color="text.secondary"
                         sx={{ textDecoration: 'line-through', ml: 1 }}
                       >
-                        ₹{property.originalPrice || 0}
+                        ₹{property.base_price || 'N/A'}
                       </Typography>
                     </Typography>
                     <Typography variant="caption" color="text.secondary">

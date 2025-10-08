@@ -220,17 +220,17 @@ export default function HotelsPage() {
       {/* Desktop Filter Sidebar + List */}
       <Grid container spacing={3}>
         {!isMobile && (
-          <Grid item md={3}>
+          <Grid size={3}>
             <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
               {FilterContent}
             </Paper>
           </Grid>
         )}
 
-        <Grid item xs={12} md={9}>
+        <Grid size={{ xs: 12, md: 9 }}>
           <Grid container spacing={3}>
             {filteredHotels.map((property) => (
-              <Grid key={property.id} item xs={12} sm={6} md={6}>
+              <Grid key={property.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Paper
                   elevation={2}
                   sx={{
@@ -278,7 +278,7 @@ export default function HotelsPage() {
                       gutterBottom
                       noWrap
                     >
-                      {property.name}
+                      {property.hotel_name}
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -356,7 +356,7 @@ export default function HotelsPage() {
                           fontWeight="bold"
                           color="primary"
                         >
-                          ₹{property.price || 0.0}
+                          ₹{property.discounted_base_price || 'N/A'}
                           <Typography
                             component="span"
                             variant="body2"
@@ -366,7 +366,7 @@ export default function HotelsPage() {
                               ml: 1,
                             }}
                           >
-                            ₹{property.originalPrice || 0}
+                            ₹{property.base_price || 'N/A'}
                           </Typography>
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
