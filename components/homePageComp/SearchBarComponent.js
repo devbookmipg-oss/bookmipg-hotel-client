@@ -200,7 +200,7 @@ export default function SearchBarComponent({ locations }) {
                 borderRadius: 2,
                 py: 1.5,
                 fontWeight: 'bold',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'red',
               }}
             >
               Apply Dates
@@ -482,7 +482,7 @@ export default function SearchBarComponent({ locations }) {
                     mb: 0.5,
                   }}
                 >
-                  <LocationOn sx={{ fontSize: 20, color: 'primary.main' }} />
+                  <LocationOn sx={{ fontSize: 20, color: 'error.main' }} />
                   <Typography
                     variant="body2"
                     color="text.secondary"
@@ -531,7 +531,7 @@ export default function SearchBarComponent({ locations }) {
                     mb: 0.5,
                   }}
                 >
-                  <CalendarToday sx={{ fontSize: 20, color: 'primary.main' }} />
+                  <CalendarToday sx={{ fontSize: 20, color: 'error.main' }} />
                   <Typography
                     variant="body2"
                     color="text.secondary"
@@ -583,7 +583,7 @@ export default function SearchBarComponent({ locations }) {
                     mb: 0.5,
                   }}
                 >
-                  <Person sx={{ fontSize: 20, color: 'primary.main' }} />
+                  <Person sx={{ fontSize: 20, color: 'error.main' }} />
                   <Typography
                     variant="body2"
                     color="text.secondary"
@@ -612,12 +612,10 @@ export default function SearchBarComponent({ locations }) {
                   ml: isMobile ? 0 : 1,
                   mt: isMobile ? 1 : 0,
                   fontWeight: 'bold',
-                  background:
-                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                  background: 'red',
+
                   '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.6)',
                   },
                   transition: 'all 0.3s ease',
                 }}

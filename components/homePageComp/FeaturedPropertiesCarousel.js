@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context';
 import { UpdateData } from '@/utils/ApiFunctions';
 import { ErrorToast, SuccessToast } from '@/utils/GenerateToast';
+import { calculateReviewStats } from '@/utils/CalculateRating';
 
 export default function FeaturedPropertiesCarousel({ hotels }) {
   const { auth } = useAuth();
@@ -79,6 +80,8 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
     ],
   };
 
+  console.log('FeaturedPropertiesCarousel hotels:', hotels);
+
   return (
     <Box
       sx={{
@@ -92,6 +95,7 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
           const isFav = property?.online_users?.some(
             (u) => u.documentId === auth?.user?.id
           );
+          const ratingValue = calculateReviewStats(property.reviews);
 
           return (
             <Box
@@ -175,7 +179,7 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
 
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Rating
-                      value={property.rating || 4}
+                      value={ratingValue.averageRating || 0}
                       readOnly
                       size="small"
                     />
@@ -184,7 +188,8 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
                       color="text.secondary"
                       sx={{ ml: 1 }}
                     >
-                      {property.rating || 0} ({property.reviewCount || 0})
+                      {ratingValue.averageRating || 0} (
+                      {ratingValue.totalReviews || 0})
                     </Typography>
                   </Box>
 
@@ -218,11 +223,7 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
                     }}
                   >
                     <Box>
-                      <Typography
-                        variant="h6"
-                        fontWeight="bold"
-                        color="primary"
-                      >
+                      <Typography variant="h6" fontWeight="bold" color="red">
                         ₹{property.discounted_base_price || 'N/A'}
                         <Typography
                           component="span"
@@ -248,8 +249,7 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
                         borderRadius: 2,
                         px: 2,
                         fontWeight: 'bold',
-                        background:
-                          'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'red',
                       }}
                     >
                       Book Now

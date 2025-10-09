@@ -21,7 +21,6 @@ import {
   Favorite,
   FavoriteBorder,
   LocationOn,
-  Tune,
   Close,
   FilterAltOutlined,
 } from '@mui/icons-material';
@@ -32,6 +31,7 @@ import { useTheme } from '@mui/material/styles';
 import { useAuth } from '@/context';
 import { Preloader } from '@/components/common';
 import { ErrorToast, SuccessToast } from '@/utils/GenerateToast';
+import { calculateReviewStats } from '@/utils/CalculateRating';
 
 const HotelsPage = () => {
   const router = useRouter();
@@ -40,29 +40,18 @@ const HotelsPage = () => {
   const searchParams = useSearchParams();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const location = searchParams.get('location');
-  const checkin = searchParams.get('checkin');
-  const checkout = searchParams.get('checkout');
-  const adults = searchParams.get('adults');
-  const children = searchParams.get('children');
+  const queryLocation = searchParams.get('location') || '';
 
-  // Data
+  // Always call hooks at the top — no conditional returns before this
   const hotels = GetDataList({ endPoint: 'hotels' }) || [];
   const locations = GetDataList({ endPoint: 'locations' }) || [];
 
-  if (!hotels || !locations) {
-    <Preloader />;
-  }
-
-  // States
   const [filteredHotels, setFilteredHotels] = useState([]);
   const [sortOption, setSortOption] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState(queryLocation);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
-  const [favorites, setFavorites] = useState(new Set());
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Example static list of amenities
   const amenitiesList = [
     'Free Wi-Fi',
     'Parking',
@@ -72,64 +61,71 @@ const HotelsPage = () => {
     'Gym',
     'Spa',
     'Bar',
+    'Pool',
   ];
 
-  // Filter logic
+  // ✅ useEffect always runs — no conditional call
   useEffect(() => {
-    if (hotels.length) {
-      let list = [...hotels];
+    if (!hotels?.length) return;
 
-      if (selectedLocation)
-        list = list.filter((h) => h.hotel_district === selectedLocation);
+    let list = [...hotels];
 
-      if (selectedAmenities.length > 0)
-        list = list.filter((h) =>
-          selectedAmenities.every((am) =>
-            h.amenities.some((a) => a.title === am)
-          )
-        );
-
-      if (sortOption === 'lowToHigh')
-        list.sort(
-          (a, b) =>
-            (a.discounted_base_price || 0) - (b.discounted_base_price || 0)
-        );
-      if (sortOption === 'highToLow')
-        list.sort(
-          (a, b) =>
-            (b.discounted_base_price || 0) - (a.discounted_base_price || 0)
-        );
-
-      setFilteredHotels(list);
+    // Filter by location
+    if (selectedLocation) {
+      const search = selectedLocation.toLowerCase();
+      list = list.filter(
+        (h) =>
+          h.hotel_district?.toLowerCase().includes(search) ||
+          h.hotel_state?.toLowerCase().includes(search) ||
+          h.hotel_name?.toLowerCase().includes(search)
+      );
     }
+
+    // Filter by amenities
+    if (selectedAmenities.length > 0) {
+      list = list.filter((h) =>
+        selectedAmenities.every((am) =>
+          h.amenities?.some((a) => a.title === am)
+        )
+      );
+    }
+
+    // Sort
+    if (sortOption === 'lowToHigh') {
+      list.sort(
+        (a, b) =>
+          (a.discounted_base_price || 0) - (b.discounted_base_price || 0)
+      );
+    } else if (sortOption === 'highToLow') {
+      list.sort(
+        (a, b) =>
+          (b.discounted_base_price || 0) - (a.discounted_base_price || 0)
+      );
+    }
+
+    setFilteredHotels(list);
   }, [hotels, selectedLocation, selectedAmenities, sortOption]);
 
   const toggleFavorite = async (propertyId, isFav) => {
     try {
       const property = hotels.find((p) => p.documentId === propertyId);
-      let newFavList = property?.online_users?.map(
-        ({ documentId }) => documentId
-      );
-      if (isFav) {
-        newFavList = newFavList.filter((user) => user !== auth.user.id);
-      } else {
-        newFavList = [...newFavList, auth.user.id];
-      }
+      if (!property) return;
+
+      let newFavList = property?.online_users?.map((u) => u.documentId) || [];
+
+      if (isFav) newFavList = newFavList.filter((id) => id !== auth.user.id);
+      else newFavList.push(auth.user.id);
 
       await UpdateData({
         auth,
         endPoint: 'hotels',
         id: propertyId,
-        payload: {
-          data: {
-            online_users: newFavList,
-          },
-        },
+        payload: { data: { online_users: newFavList } },
       });
-      SuccessToast('Added to wishlist');
+      SuccessToast(isFav ? 'Removed from wishlist' : 'Added to wishlist');
     } catch (err) {
-      console.log(`error toggleFav: ${err}`);
-      ErrorToast('Someting went wrong');
+      console.error(`error toggleFav: ${err}`);
+      ErrorToast('Something went wrong');
     }
   };
 
@@ -155,19 +151,6 @@ const HotelsPage = () => {
       <Divider sx={{ mb: 2 }} />
 
       <FormControl size="small" fullWidth sx={{ mb: 2 }}>
-        <InputLabel>Sort By</InputLabel>
-        <Select
-          value={sortOption}
-          onChange={(e) => setSortOption(e.target.value)}
-          label="Sort By"
-        >
-          <MenuItem value="">Default</MenuItem>
-          <MenuItem value="lowToHigh">Price: Low → High</MenuItem>
-          <MenuItem value="highToLow">Price: High → Low</MenuItem>
-        </Select>
-      </FormControl>
-
-      <FormControl size="small" fullWidth sx={{ mb: 2 }}>
         <InputLabel>Location</InputLabel>
         <Select
           value={selectedLocation}
@@ -176,7 +159,7 @@ const HotelsPage = () => {
         >
           <MenuItem value="">All</MenuItem>
           {locations?.map((loc, i) => (
-            <MenuItem key={i} value={loc.name}>
+            <MenuItem key={i} value={loc.city}>
               {loc.city}, {loc.state}
             </MenuItem>
           ))}
@@ -214,7 +197,7 @@ const HotelsPage = () => {
             mt: 3,
             borderRadius: 2,
             textTransform: 'none',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'red',
           }}
           onClick={() => setDrawerOpen(false)}
         >
@@ -224,28 +207,62 @@ const HotelsPage = () => {
     </Box>
   );
 
+  // ✅ Early return *after* all hooks
+  if (!hotels?.length || !locations?.length) {
+    return (
+      <Box sx={{ py: 10 }}>
+        <Preloader />
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
-      {/* Mobile Filter Button */}
-      {isMobile && (
-        <Button
-          variant="outlined"
-          startIcon={<FilterAltOutlined />}
-          onClick={() => setDrawerOpen(true)}
-          sx={{
-            mb: 2,
-            textTransform: 'none',
-            borderRadius: 3,
-            fontWeight: 600,
-            color: 'primary.main',
-            borderColor: 'primary.main',
-          }}
-        >
-          Filters & Sort
-        </Button>
-      )}
+      {/* Top bar with Sort + Filter */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 2,
+        }}
+      >
+        {isMobile ? (
+          <Button
+            variant="outlined"
+            startIcon={<FilterAltOutlined />}
+            onClick={() => setDrawerOpen(true)}
+            sx={{
+              textTransform: 'none',
+              borderRadius: 3,
+              fontWeight: 600,
+              color: 'primary.main',
+              borderColor: 'primary.main',
+            }}
+          >
+            Filters
+          </Button>
+        ) : (
+          <Typography variant="h6" fontWeight="bold">
+            Explore Hotels
+          </Typography>
+        )}
 
-      {/* Drawer (Mobile) */}
+        <FormControl size="small" sx={{ minWidth: 180 }}>
+          <InputLabel>Sort By</InputLabel>
+          <Select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            label="Sort By"
+          >
+            <MenuItem value="">Default</MenuItem>
+            <MenuItem value="lowToHigh">Price: Low → High</MenuItem>
+            <MenuItem value="highToLow">Price: High → Low</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* Drawer (Mobile Filter) */}
       <Drawer
         anchor="right"
         open={drawerOpen}
@@ -254,10 +271,9 @@ const HotelsPage = () => {
         {FilterContent}
       </Drawer>
 
-      {/* Desktop Filter Sidebar + List */}
       <Grid container spacing={3}>
         {!isMobile && (
-          <Grid size={3}>
+          <Grid size={{ md: 3 }}>
             <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
               {FilterContent}
             </Paper>
@@ -270,8 +286,9 @@ const HotelsPage = () => {
               const isFav = property?.online_users?.some(
                 (u) => u.documentId === auth?.user?.id
               );
+              const ratingValue = calculateReviewStats(property?.reviews);
               return (
-                <Grid key={property.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                <Grid key={property.documentId} size={{ xs: 12, sm: 6, md: 4 }}>
                   <Paper
                     elevation={2}
                     sx={{
@@ -284,7 +301,6 @@ const HotelsPage = () => {
                       },
                     }}
                   >
-                    {/* Image */}
                     <Box
                       sx={{
                         height: { xs: 160, sm: 180 },
@@ -292,44 +308,29 @@ const HotelsPage = () => {
                         position: 'relative',
                       }}
                     >
-                      {auth.user ? (
-                        <IconButton
-                          onClick={() =>
-                            toggleFavorite(property.documentId, isFav)
-                          }
-                          sx={{
-                            position: 'absolute',
-                            top: 12,
-                            right: 12,
-                            bgcolor: 'rgba(255,255,255,0.9)',
-                            '&:hover': { bgcolor: 'white' },
-                          }}
-                          size="small"
-                        >
-                          {isFav ? (
-                            <Favorite color="error" />
-                          ) : (
-                            <FavoriteBorder />
-                          )}
-                        </IconButton>
-                      ) : (
-                        <IconButton
-                          onClick={() => router.push('/signin')}
-                          sx={{
-                            position: 'absolute',
-                            top: 12,
-                            right: 12,
-                            bgcolor: 'rgba(255,255,255,0.9)',
-                            '&:hover': { bgcolor: 'white' },
-                          }}
-                          size="small"
-                        >
+                      <IconButton
+                        onClick={() =>
+                          auth.user
+                            ? toggleFavorite(property.documentId, isFav)
+                            : router.push('/signin')
+                        }
+                        sx={{
+                          position: 'absolute',
+                          top: 12,
+                          right: 12,
+                          bgcolor: 'rgba(255,255,255,0.9)',
+                          '&:hover': { bgcolor: 'white' },
+                        }}
+                        size="small"
+                      >
+                        {isFav ? (
+                          <Favorite color="error" />
+                        ) : (
                           <FavoriteBorder />
-                        </IconButton>
-                      )}
+                        )}
+                      </IconButton>
                     </Box>
 
-                    {/* Details */}
                     <Box sx={{ p: 2 }}>
                       <Typography
                         variant="h6"
@@ -355,8 +356,8 @@ const HotelsPage = () => {
                           color="text.secondary"
                           noWrap
                         >
-                          {property?.hotel_address_line1},{' '}
-                          {property?.hotel_district}, {property?.hotel_state}
+                          {property.hotel_address_line1},{' '}
+                          {property.hotel_district}, {property.hotel_state}
                         </Typography>
                       </Box>
 
@@ -368,7 +369,7 @@ const HotelsPage = () => {
                         }}
                       >
                         <Rating
-                          value={property.rating || 4}
+                          value={ratingValue.averageRating || 0}
                           readOnly
                           size="small"
                         />
@@ -377,7 +378,8 @@ const HotelsPage = () => {
                           color="text.secondary"
                           sx={{ ml: 1 }}
                         >
-                          {property.rating || 0} ({property.reviewCount || 0})
+                          {ratingValue.averageRating || 0} (
+                          {ratingValue.totalReviews || 0})
                         </Typography>
                       </Box>
 
@@ -389,16 +391,16 @@ const HotelsPage = () => {
                           flexWrap: 'wrap',
                         }}
                       >
-                        {property.amenities.slice(0, 3).map((amenity, idx) => (
+                        {property.amenities?.slice(0, 3).map((a, idx) => (
                           <Chip
                             key={idx}
-                            label={amenity.title}
+                            label={a.title}
                             size="small"
                             variant="outlined"
                             sx={{ fontSize: '0.7rem', height: 24 }}
                           />
                         ))}
-                        {property.amenities.length > 3 && (
+                        {property.amenities?.length > 3 && (
                           <Chip
                             label={`+${property.amenities.length - 3}`}
                             size="small"
@@ -419,7 +421,7 @@ const HotelsPage = () => {
                           <Typography
                             variant="h6"
                             fontWeight="bold"
-                            color="primary"
+                            color="error"
                           >
                             ₹{property.discounted_base_price || 'N/A'}
                             <Typography
@@ -449,8 +451,7 @@ const HotelsPage = () => {
                             borderRadius: 2,
                             px: 2,
                             fontWeight: 'bold',
-                            background:
-                              'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            background: 'red',
                           }}
                         >
                           Book Now
@@ -478,13 +479,10 @@ const HotelsPage = () => {
   );
 };
 
-const Page = () => {
-  return (
-    <>
-      <Suspense>
-        <HotelsPage />
-      </Suspense>
-    </>
-  );
-};
+const Page = () => (
+  <Suspense>
+    <HotelsPage />
+  </Suspense>
+);
+
 export default Page;

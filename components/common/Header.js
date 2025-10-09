@@ -35,6 +35,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/context';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 // Styled components
 const SearchBar = styled('div')(({ theme }) => ({
@@ -102,7 +103,9 @@ export default function Header() {
         <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
           {/* Logo Section */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Image src="/logo-color.png" width={100} height={50} alt="logo" />
+            <Link href="/">
+              <Image src="/logo-color.png" width={100} height={50} alt="logo" />
+            </Link>
 
             {/* Navigation Links */}
             <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
@@ -234,7 +237,7 @@ export default function Header() {
                   sx={{
                     width: 32,
                     height: 32,
-                    bgcolor: 'primary.main',
+                    bgcolor: 'error.main',
                     fontSize: '14px',
                   }}
                 >
