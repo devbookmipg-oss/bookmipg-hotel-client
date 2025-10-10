@@ -387,6 +387,15 @@ const HotelDetailsPage = () => {
                                   >
                                     {room?.description}
                                   </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    paragraph
+                                    sx={{ lineHeight: 1.6 }}
+                                  >
+                                    Adults: {room?.max_adults} | Children:{' '}
+                                    {room?.max_child}
+                                  </Typography>
 
                                   <Box
                                     sx={{
