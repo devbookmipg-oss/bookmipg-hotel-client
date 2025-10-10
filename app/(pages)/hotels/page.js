@@ -221,7 +221,7 @@ const HotelsPage = () => {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 } }}>
+    <Box sx={{ p: { xs: 2, md: 20 }, mb: 10 }}>
       {/* Top bar with Sort + Filter */}
       <Box
         sx={{

@@ -7,6 +7,7 @@ import {
   SearchBarComponent,
 } from '@/components/homePageComp';
 import { GetDataList } from '@/utils/ApiFunctions';
+import { Box } from '@mui/material';
 
 const Page = () => {
   const locations = GetDataList({
@@ -19,10 +20,12 @@ const Page = () => {
   return (
     <>
       <Header />
-      <SearchBarComponent locations={locations} />
+      <Box>
+        <SearchBarComponent locations={locations} />
 
-      <QuickCategoriesGrid />
-      <FeaturedPropertiesCarousel hotels={hotels} />
+        <QuickCategoriesGrid />
+        <FeaturedPropertiesCarousel hotels={hotels} />
+      </Box>
       <Footer />
     </>
   );

@@ -194,7 +194,7 @@ const HotelDetailsPage = () => {
           >
             <ImageGallery data={data} />
 
-            <Container maxWidth="xl" sx={{ px: isMobile ? 2 : 3 }}>
+            <Container maxWidth="xl" sx={{ px: isMobile ? 2 : 3, mb: 10 }}>
               <Grid container spacing={4}>
                 {/* Main Content */}
                 <Grid size={{ xs: 12, md: 8 }}>
@@ -453,7 +453,6 @@ const HotelDetailsPage = () => {
                   </Box>
                 </Grid>
 
-                {/* Booking Sidebar - Sticky on desktop, fixed bottom on mobile */}
                 <Grid size={{ xs: 12, md: 4 }}>
                   <Box>
                     <Paper
@@ -461,7 +460,7 @@ const HotelDetailsPage = () => {
                         p: 3,
                         background:
                           'linear-gradient(135deg, #ffffffff , #fff4f4ff)',
-                        borderRadius: isMobile ? '16px 16px 0 0' : 3,
+                        borderRadius: 3,
                         border: '5px solid red',
                         boxShadow: isMobile
                           ? 'none'
@@ -645,41 +644,10 @@ const HotelDetailsPage = () => {
                           >
                             🔒 Secure Booking · Easy Cancellation
                           </Typography>
-                          {/* <AvatarGroup
-                            max={4}
-                            sx={{ justifyContent: 'center', mb: 1 }}
-                          >
-                            <Avatar
-                              sx={{ width: 24, height: 24, bgcolor: '#667eea' }}
-                            >
-                              A
-                            </Avatar>
-                            <Avatar
-                              sx={{ width: 24, height: 24, bgcolor: '#4ECDC4' }}
-                            >
-                              B
-                            </Avatar>
-                            <Avatar
-                              sx={{ width: 24, height: 24, bgcolor: '#FF6B6B' }}
-                            >
-                              C
-                            </Avatar>
-                            <Avatar
-                              sx={{ width: 24, height: 24, bgcolor: '#764ba2' }}
-                            >
-                              D
-                            </Avatar>
-                          </AvatarGroup>
-                          <Typography variant="caption" color="text.secondary">
-                            Booked by 1247+ guests today
-                          </Typography> */}
                         </Box>
                       </Grid>
                     </Paper>
                   </Box>
-
-                  {/* Spacer for mobile fixed booking form */}
-                  {isMobile && <Box sx={{ height: 400 }} />}
                 </Grid>
               </Grid>
             </Container>
