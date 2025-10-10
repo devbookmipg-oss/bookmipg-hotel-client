@@ -15,6 +15,7 @@ import { useAuth } from '@/context';
 import { GetSingleData } from '@/utils/ApiFunctions';
 import { UpdateUserForm } from '@/components/forms';
 import { parseCookies } from 'nookies';
+import { Preloader } from '@/components/common';
 
 export default function ProfileSettingsPage() {
   const router = useRouter();
@@ -41,16 +42,7 @@ export default function ProfileSettingsPage() {
   return (
     <Box sx={{ minHeight: '50vh', bgcolor: '#fafafa', pb: 6, mb: 5 }}>
       {!data || isLoading ? (
-        <Box
-          sx={{
-            height: '50vh',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <CircularProgress color="error" />
-        </Box>
+        <Preloader />
       ) : (
         <>
           {/* 🌈 Header with Avatar */}
@@ -88,9 +80,11 @@ export default function ProfileSettingsPage() {
             {/* 📜 Links Section */}
             <Grid container spacing={1.5} mt={4}>
               {[
+                { label: 'About Us', href: '/about-us' },
                 { label: 'Terms & Conditions', href: '/terms-and-condition' },
                 { label: 'Privacy Policy', href: '/privacy-policy' },
                 { label: 'Cancellation Policy', href: '/cancellation-refund' },
+                { label: 'Delete Account', href: '/delete-account' },
                 { label: 'Contact Us', href: '/contact' },
               ].map((link, i) => (
                 <Grid key={i} size={{ xs: 6, md: 12 }}>

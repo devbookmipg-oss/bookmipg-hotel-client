@@ -202,16 +202,28 @@ export default function Footer() {
               Follow Us
             </Typography>
             <Box>
-              <IconButton color="inherit" href="https://facebook.com">
+              <IconButton
+                color="inherit"
+                href="https://www.facebook.com/profile.php?id=100091242189153"
+              >
                 <Facebook />
               </IconButton>
-              <IconButton color="inherit" href="https://twitter.com">
+              <IconButton
+                color="inherit"
+                href="https://x.com/bookmipg?t=EuGjmLNzuuBQ2RGVwfkH1Q&s=09"
+              >
                 <Twitter />
               </IconButton>
-              <IconButton color="inherit" href="https://instagram.com">
+              <IconButton
+                color="inherit"
+                href="https://www.instagram.com/bookmipg.official?igsh=MXJkcW9pdjBhemkxag=="
+              >
                 <Instagram />
               </IconButton>
-              <IconButton color="inherit" href="https://youtube.com">
+              <IconButton
+                color="inherit"
+                href="https://youtube.com/@bookmipg?si=UBiBkZUccAZ4_oNd"
+              >
                 <YouTube />
               </IconButton>
             </Box>

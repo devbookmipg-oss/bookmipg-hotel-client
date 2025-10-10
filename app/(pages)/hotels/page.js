@@ -213,11 +213,7 @@ const HotelsPage = () => {
 
   // ✅ Early return *after* all hooks
   if (!hotels?.length || !locations?.length) {
-    return (
-      <Box sx={{ py: 10 }}>
-        <Preloader />
-      </Box>
-    );
+    return <Preloader />;
   }
 
   return (

@@ -24,6 +24,7 @@ import HotelIcon from '@mui/icons-material/Hotel';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { GetCustomDate } from '@/utils/DateFetcher';
+import { Preloader } from '@/components/common';
 
 const Page = () => {
   const router = useRouter();
@@ -50,17 +51,7 @@ const Page = () => {
   );
 
   if (isLoading) {
-    return (
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        height="100vh"
-        sx={{ bgcolor: 'background.default' }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+    return <Preloader />;
   }
 
   if (!filteredData || filteredData.length === 0) {
