@@ -312,7 +312,7 @@ export default function Footer() {
           />
           <StyledBottomNavigationAction
             component={Link}
-            href="/profile"
+            href="/user/profile"
             label="Profile"
             icon={<Person />}
           />
