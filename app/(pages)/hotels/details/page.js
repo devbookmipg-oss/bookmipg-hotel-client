@@ -46,7 +46,12 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { GetDataList, GetSingleData, UpdateData } from '@/utils/ApiFunctions';
 import { Preloader } from '@/components/common';
-import { ImageGallery, About, Amenities } from '@/components/hotelDetailsComp';
+import {
+  ImageGallery,
+  About,
+  Amenities,
+  HotelHeader,
+} from '@/components/hotelDetailsComp';
 import { calculateReviewStats } from '@/utils/CalculateRating';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context';
@@ -134,6 +139,7 @@ const HotelDetailsPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [selectedRoom, setSelectedRoom] = useState('');
+  const [selectedRooms, setSelectedRooms] = useState([]);
   const [bookingData, setBookingData] = useState({
     checkIn: checkin,
     checkOut: checkout,
@@ -157,8 +163,6 @@ const HotelDetailsPage = () => {
   const isFav = data?.online_users?.some(
     (u) => u.documentId === auth?.user?.id
   );
-  const ratingValue = calculateReviewStats(data?.reviews);
-
   const toggleFavorite = async () => {
     try {
       let newFavList = data?.online_users?.map((u) => u.documentId) || [];
@@ -177,6 +181,16 @@ const HotelDetailsPage = () => {
       console.error(`error toggleFav: ${err}`);
       ErrorToast('Something went wrong');
     }
+  };
+
+  const handleRoomSelect = (room) => {
+    let updatedRooms = [...selectedRooms];
+    if (updatedRooms.includes(room)) {
+      updatedRooms = updatedRooms.filter((r) => r !== room);
+    } else {
+      updatedRooms.push(room);
+    }
+    setSelectedRooms(updatedRooms);
   };
 
   return (
@@ -199,88 +213,12 @@ const HotelDetailsPage = () => {
                 {/* Main Content */}
                 <Grid size={{ xs: 12, md: 8 }}>
                   {/* Hotel Header */}
-                  <Box sx={{ mb: 4 }}>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        mb: 2,
-                        flexDirection: isMobile ? 'column' : 'row',
-                        gap: isMobile ? 2 : 0,
-                      }}
-                    >
-                      <Box sx={{ flex: 1 }}>
-                        <Typography
-                          variant={isMobile ? 'h4' : 'h3'}
-                          component="h1"
-                          fontWeight="700"
-                          sx={{
-                            background: 'red',
-                            backgroundClip: 'text',
-                            WebkitBackgroundClip: 'text',
-                            color: 'transparent',
-                            fontSize: isMobile ? '2rem' : '2.5rem',
-                            lineHeight: 1.2,
-                          }}
-                        >
-                          {data.hotel_name}
-                        </Typography>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            mt: 1,
-                          }}
-                        >
-                          <Rating
-                            value={ratingValue.averageRating}
-                            precision={0.1}
-                            readOnly
-                          />
-                          <Typography variant="body1" color="text.secondary">
-                            {ratingValue.averageRating} (
-                            {ratingValue.totalReviews} reviews)
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <IconButton
-                          sx={{
-                            bgcolor: '#f2f2f2ff',
-                            border: '1px solid #d7d7d7ff',
-                          }}
-                          onClick={() =>
-                            auth.user
-                              ? toggleFavorite()
-                              : router.push('/signin')
-                          }
-                        >
-                          {isFav ? (
-                            <Favorite color="error" />
-                          ) : (
-                            <FavoriteBorder />
-                          )}
-                        </IconButton>
-                      </Box>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        mb: 3,
-                      }}
-                    >
-                      <LocationOn sx={{ color: '#667eea' }} />
-                      <Typography variant="body1" color="text.secondary">
-                        {data.hotel_address_line1},{data.hotel_district},
-                        {data.hotel_country},{data.hotel_pincode}
-                      </Typography>
-                    </Box>
-                  </Box>
+                  <HotelHeader
+                    data={data}
+                    toggleFavorite={toggleFavorite}
+                    isMobile={isMobile}
+                    isFav={isFav}
+                  />
 
                   {/* Amenities */}
                   <Amenities data={data} />
@@ -305,150 +243,149 @@ const HotelDetailsPage = () => {
                         ?.filter((room) => {
                           return room.hotel_id === id;
                         })
-                        ?.map((room) => (
-                          <Card
-                            key={room.id}
-                            sx={{
-                              display: 'flex',
-                              flexDirection: isMobile ? 'column' : 'row',
-                              transition: 'all 0.3s ease',
-                              borderRadius: 3,
-                              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-                              border: '1px solid rgba(0,0,0,0.04)',
-                              '&:hover': {
-                                transform: 'translateY(-4px)',
-                                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                              },
-                            }}
-                          >
-                            <CardMedia
-                              component="img"
+                        ?.map((room) => {
+                          const selected = selectedRooms.includes(room);
+                          return (
+                            <Card
+                              key={room.id}
                               sx={{
-                                width: isMobile ? '100%' : 300,
-                                height: isMobile ? 200 : 250,
-                                objectFit: 'cover',
-                              }}
-                              image={room?.room_image?.url}
-                              alt={room?.name}
-                            />
-                            <CardContent
-                              sx={{
-                                flex: 1,
                                 display: 'flex',
-                                flexDirection: 'column',
-                                p: 3,
+                                flexDirection: isMobile ? 'column' : 'row',
+                                transition: 'all 0.3s ease',
+                                borderRadius: 3,
+                                boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                                border: '1px solid rgba(0,0,0,0.04)',
+                                '&:hover': {
+                                  transform: 'translateY(-4px)',
+                                  boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                                },
                               }}
                             >
-                              <Box sx={{ flex: 1 }}>
-                                <Typography
-                                  variant="h6"
-                                  component="h3"
-                                  gutterBottom
-                                  fontWeight="600"
-                                >
-                                  {room?.name}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                  paragraph
-                                  sx={{ lineHeight: 1.6 }}
-                                >
-                                  {room?.description}
-                                </Typography>
-
-                                <Box
-                                  sx={{
-                                    display: 'flex',
-                                    gap: 1,
-                                    flexWrap: 'wrap',
-                                    mb: 2,
-                                  }}
-                                >
-                                  {room?.amenities?.map((feature, index) => (
-                                    <Chip
-                                      key={index}
-                                      label={feature?.title}
-                                      size="small"
-                                      variant="outlined"
-                                      sx={{
-                                        borderColor: '#667eea',
-                                        color: '#667eea',
-                                        fontWeight: 500,
-                                      }}
-                                    />
-                                  ))}
-                                </Box>
-                              </Box>
-
-                              <Box
+                              <CardMedia
+                                component="img"
                                 sx={{
+                                  width: isMobile ? '100%' : 300,
+                                  height: isMobile ? 200 : 250,
+                                  objectFit: 'cover',
+                                }}
+                                image={room?.room_image?.url}
+                                alt={room?.name}
+                              />
+                              <CardContent
+                                sx={{
+                                  flex: 1,
                                   display: 'flex',
-                                  justifyContent: 'space-between',
-                                  alignItems: isMobile
-                                    ? 'flex-start'
-                                    : 'center',
-                                  flexDirection: isMobile ? 'column' : 'row',
-                                  gap: isMobile ? 2 : 0,
+                                  flexDirection: 'column',
+                                  p: 3,
                                 }}
                               >
-                                <Box>
+                                <Box sx={{ flex: 1 }}>
                                   <Typography
-                                    variant="h5"
-                                    component="div"
-                                    sx={{
-                                      color: '#667eea',
-                                      fontWeight: 'bold',
-                                    }}
+                                    variant="h6"
+                                    component="h3"
+                                    gutterBottom
+                                    fontWeight="600"
                                   >
-                                    ₹{room?.total}
-                                    <Typography
-                                      variant="body2"
-                                      color="text.secondary"
-                                      component="span"
-                                      sx={{ ml: 0.5 }}
-                                    >
-                                      /night
-                                    </Typography>
+                                    {room?.name}
                                   </Typography>
                                   <Typography
                                     variant="body2"
                                     color="text.secondary"
+                                    paragraph
+                                    sx={{ lineHeight: 1.6 }}
                                   >
-                                    Sleeps {room?.capacity}
+                                    {room?.description}
                                   </Typography>
+
+                                  <Box
+                                    sx={{
+                                      display: 'flex',
+                                      gap: 1,
+                                      flexWrap: 'wrap',
+                                      mb: 2,
+                                    }}
+                                  >
+                                    {room?.amenities?.map((feature, index) => (
+                                      <Chip
+                                        key={index}
+                                        label={feature?.title}
+                                        size="small"
+                                        variant="outlined"
+                                        sx={{
+                                          borderColor: '#667eea',
+                                          color: '#667eea',
+                                          fontWeight: 500,
+                                        }}
+                                      />
+                                    ))}
+                                  </Box>
                                 </Box>
 
-                                <Button
-                                  variant="contained"
-                                  size="large"
-                                  onClick={() =>
-                                    setSelectedRoom(room.id.toString())
-                                  }
+                                <Box
                                   sx={{
-                                    background:
-                                      'linear-gradient(45deg, #FF6B6B, #4ECDC4)',
-                                    borderRadius: 3,
-                                    px: 4,
-                                    py: 1,
-                                    fontWeight: 600,
-                                    textTransform: 'none',
-                                    fontSize: '1rem',
-                                    boxShadow: 'none',
-                                    '&:hover': {
-                                      boxShadow:
-                                        '0 4px 12px rgba(255, 107, 107, 0.3)',
-                                      background:
-                                        'linear-gradient(45deg, #FF8E8E, #6ADBD1)',
-                                    },
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: isMobile
+                                      ? 'flex-start'
+                                      : 'center',
+                                    flexDirection: isMobile ? 'column' : 'row',
+                                    gap: isMobile ? 2 : 0,
                                   }}
                                 >
-                                  Select Room
-                                </Button>
-                              </Box>
-                            </CardContent>
-                          </Card>
-                        ))}
+                                  <Box>
+                                    <Typography
+                                      variant="h5"
+                                      component="div"
+                                      sx={{
+                                        color: '#667eea',
+                                        fontWeight: 'bold',
+                                      }}
+                                    >
+                                      ₹{room?.total}
+                                      <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                        component="span"
+                                        sx={{ ml: 0.5 }}
+                                      >
+                                        /night
+                                      </Typography>
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      color="text.secondary"
+                                    >
+                                      Sleeps {room?.capacity}
+                                    </Typography>
+                                  </Box>
+
+                                  <Button
+                                    variant={
+                                      selected ? 'contained' : 'outlined'
+                                    }
+                                    startIcon={
+                                      selected ? <CheckCircleOutline /> : null
+                                    }
+                                    color="error"
+                                    size="large"
+                                    onClick={() => handleRoomSelect(room)}
+                                    sx={{
+                                      borderRadius: 3,
+                                      px: 4,
+                                      py: 1,
+                                      fontWeight: 600,
+                                      textTransform: 'none',
+                                      fontSize: '1rem',
+                                      boxShadow: 'none',
+                                    }}
+                                  >
+                                    {selected ? 'Selected' : 'Select Room'}
+                                  </Button>
+                                </Box>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
                     </Stack>
                   </Box>
                 </Grid>

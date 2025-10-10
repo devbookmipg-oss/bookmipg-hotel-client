@@ -39,3 +39,43 @@ body {
 * {
   transition: all 0.2s ease-in-out;
 }
+
+/* loader */
+
+.loader {
+  width: 80px; /* increased from 40px */
+  aspect-ratio: 1;
+  color: #f03355;
+  position: relative;
+  background: radial-gradient(20px, currentColor 94%, #0000);
+}
+
+.loader:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(18px at bottom right, #0000 94%, currentColor) top
+      left,
+    radial-gradient(18px at bottom left, #0000 94%, currentColor) top right,
+    radial-gradient(18px at top right, #0000 94%, currentColor) bottom left,
+    radial-gradient(18px at top left, #0000 94%, currentColor) bottom right;
+  background-size: 40px 40px; /* doubled from 20px */
+  background-repeat: no-repeat;
+  animation: l18 1.5s infinite cubic-bezier(0.3, 1, 0, 1);
+}
+
+@keyframes l18 {
+  33% {
+    inset: -20px; /* doubled from -10px */
+    transform: rotate(0deg);
+  }
+  66% {
+    inset: -20px;
+    transform: rotate(90deg);
+  }
+  100% {
+    inset: 0;
+    transform: rotate(90deg);
+  }
+}
