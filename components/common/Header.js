@@ -73,6 +73,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 export default function Header() {
   const { auth, logout } = useAuth();
+
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -111,8 +112,8 @@ export default function Header() {
             <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
               <Button
                 color="inherit"
+                onClick={() => router.push('/')}
                 sx={{
-                  fontWeight: 600,
                   '&:hover': {
                     backgroundColor: 'rgba(0,0,0,0.04)',
                     transform: 'translateY(-1px)',
@@ -120,12 +121,12 @@ export default function Header() {
                   transition: 'all 0.3s ease',
                 }}
               >
-                Hotels
+                Hotel Booking
               </Button>
               <Button
                 color="inherit"
+                onClick={() => router.push('https://bookmipg.com/')}
                 sx={{
-                  fontWeight: 600,
                   '&:hover': {
                     backgroundColor: 'rgba(0,0,0,0.04)',
                     transform: 'translateY(-1px)',
@@ -133,12 +134,12 @@ export default function Header() {
                   transition: 'all 0.3s ease',
                 }}
               >
-                Villas
+                Property Rental
               </Button>
               <Button
                 color="inherit"
+                onClick={() => router.push('https://www.busyatri.co.in/')}
                 sx={{
-                  fontWeight: 600,
                   '&:hover': {
                     backgroundColor: 'rgba(0,0,0,0.04)',
                     transform: 'translateY(-1px)',
@@ -146,13 +147,13 @@ export default function Header() {
                   transition: 'all 0.3s ease',
                 }}
               >
-                Experiences
+                Bus Tickets
               </Button>
             </Box>
           </Box>
 
           {/* Search Bar */}
-          <Box
+          {/* <Box
             sx={{
               display: { xs: 'none', lg: 'flex' },
               flex: 1,
@@ -169,7 +170,7 @@ export default function Header() {
                 inputProps={{ 'aria-label': 'search' }}
               />
             </SearchBar>
-          </Box>
+          </Box> */}
 
           {/* Action Icons */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -196,7 +197,7 @@ export default function Header() {
                 px: 2,
               }}
             >
-              +91 888 888 8888
+              +91 876 893 0270
             </Button>
 
             {/* Favorite Icon */}

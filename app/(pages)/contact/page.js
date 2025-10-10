@@ -33,8 +33,10 @@ import {
   Facebook,
   Instagram,
   LinkedIn,
+  YouTube,
 } from '@mui/icons-material';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function ContactUs() {
   const theme = useTheme();
@@ -77,28 +79,28 @@ export default function ContactUs() {
     {
       icon: <Phone sx={{ fontSize: 32 }} />,
       title: 'Call Us',
-      details: '+1 (800) 266-5432',
+      details: '+91 876 893 0270',
       subtitle: 'Toll-Free Number',
       description: 'Available 24/7 for immediate assistance',
       action: 'Call Now',
-      href: 'tel:+18002665432',
+      href: 'tel:+91876 8930270',
       gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     },
     {
       icon: <Email sx={{ fontSize: 32 }} />,
       title: 'Email Us',
-      details: 'support@bookmipghotel.com',
+      details: 'info@bookmipg.com',
       subtitle: 'General Inquiries',
       description: 'Response within 2 hours during business hours',
       action: 'Send Email',
-      href: 'mailto:support@bookmipghotel.com',
+      href: 'mailto:info@bookmipg.com',
       gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     },
     {
       icon: <LocationOn sx={{ fontSize: 32 }} />,
       title: 'Visit Us',
-      details: '123 Hospitality Ave, Suite 500',
-      subtitle: 'New York, NY 10001, USA',
+      details: '3rd floor, Dilipbhim Building',
+      subtitle: 'Nandakumar,East Medinipur,WB-721632',
       description: 'Corporate Headquarters',
       action: 'Get Directions',
       href: 'https://maps.google.com/?q=123+Hospitality+Ave+New+York+NY+10001',
@@ -490,9 +492,9 @@ export default function ContactUs() {
                 <Typography variant="body2" paragraph sx={{ lineHeight: 1.8 }}>
                   <strong>Customer Support:</strong> 24/7
                   <br />
-                  <strong>Sales Department:</strong> Mon-Fri, 9AM-6PM EST
+                  <strong>Sales Department:</strong> Mon-Sat, 9AM-6PM EST
                   <br />
-                  <strong>Billing Department:</strong> Mon-Sun, 8AM-10PM EST
+                  <strong>Billing Department:</strong> Mon-Sat, 9AM-6PM EST
                   <br />
                   <strong>Technical Support:</strong> 24/7
                 </Typography>
@@ -553,7 +555,7 @@ export default function ContactUs() {
                 color="#d32f2f"
                 sx={{ fontSize: '1.1rem' }}
               >
-                Immediate Assistance: +1 (800) 266-5439
+                Immediate Assistance: +91 876 893 0270
               </Typography>
               <Typography
                 variant="body2"
@@ -591,31 +593,58 @@ export default function ContactUs() {
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                 {[
-                  { icon: <Facebook />, label: 'Facebook', color: '#1877F2' },
-                  { icon: <Twitter />, label: 'Twitter', color: '#1DA1F2' },
-                  { icon: <Instagram />, label: 'Instagram', color: '#E4405F' },
-                  { icon: <LinkedIn />, label: 'LinkedIn', color: '#0A66C2' },
+                  {
+                    icon: <Facebook />,
+                    label: 'Facebook',
+                    color: '#1877F2',
+                    url: 'https://www.facebook.com/profile.php?id=100091242189153',
+                  },
+                  {
+                    icon: <Twitter />,
+                    label: 'Twitter',
+                    color: '#1DA1F2',
+                    url: 'https://x.com/bookmipg?t=EuGjmLNzuuBQ2RGVwfkH1Q&s=09',
+                  },
+                  {
+                    icon: <Instagram />,
+                    label: 'Instagram',
+                    color: '#E4405F',
+                    url: 'https://www.instagram.com/bookmipg.official?igsh=MXJkcW9pdjBhemkxag==',
+                  },
+                  {
+                    icon: <YouTube />,
+                    label: 'Youtube',
+                    color: '#FF0000',
+                    url: 'https://youtube.com/@bookmipg?si=UBiBkZUccAZ4_oNd',
+                  },
                 ].map((social, index) => (
-                  <Button
+                  <Link
                     key={index}
-                    variant="contained"
-                    size="small"
-                    startIcon={social.icon}
-                    sx={{
-                      borderRadius: 2,
-                      px: 2,
-                      background: social.color,
-                      '&:hover': {
-                        background: social.color,
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 6px 20px ${alpha(social.color, 0.4)}`,
-                      },
-                      transition: 'all 0.3s ease',
-                      fontWeight: 'bold',
-                    }}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ textDecoration: 'none' }}
                   >
-                    {social.label}
-                  </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={social.icon}
+                      sx={{
+                        borderRadius: 2,
+                        px: 2,
+                        background: social.color,
+                        '&:hover': {
+                          background: social.color,
+                          transform: 'translateY(-2px)',
+                          boxShadow: `0 6px 20px ${alpha(social.color, 0.4)}`,
+                        },
+                        transition: 'all 0.3s ease',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {social.label}
+                    </Button>
+                  </Link>
                 ))}
               </Box>
             </Paper>

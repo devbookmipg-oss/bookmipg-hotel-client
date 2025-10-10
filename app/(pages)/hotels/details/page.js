@@ -25,6 +25,7 @@ import {
   Stack,
   AvatarGroup,
   Avatar,
+  CircularProgress,
 } from '@mui/material';
 import {
   Favorite,
@@ -44,7 +45,12 @@ import {
 } from '@mui/icons-material';
 
 import { useTheme } from '@mui/material/styles';
-import { GetDataList, GetSingleData, UpdateData } from '@/utils/ApiFunctions';
+import {
+  CreateNewData,
+  GetDataList,
+  GetSingleData,
+  UpdateData,
+} from '@/utils/ApiFunctions';
 import { Preloader } from '@/components/common';
 import {
   ImageGallery,
@@ -126,23 +132,26 @@ const hotelData = {
 };
 
 const HotelDetailsPage = () => {
+  const today = new Date();
+  const tomorrow = new Date();
+  tomorrow.setDate(today.getDate() + 1);
   const { auth } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = searchParams.get('id');
-  const checkin = searchParams.get('checkin') || '';
-  const checkout = searchParams.get('checkout') || '';
+  const checkin = searchParams.get('checkin') || today;
+  const checkout = searchParams.get('checkout') || tomorrow;
   const adults = searchParams.get('adults') || 1;
   const children = searchParams.get('children') || 0;
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [selectedRoom, setSelectedRoom] = useState('');
+  const [loading, setLoading] = useState(false);
   const [selectedRooms, setSelectedRooms] = useState([]);
   const [bookingData, setBookingData] = useState({
-    checkIn: checkin,
-    checkOut: checkout,
+    checkIn: checkin || today,
+    checkOut: checkout || tomorrow,
     adults: parseInt(adults, 10),
     children: parseInt(children, 10),
   });
@@ -191,6 +200,88 @@ const HotelDetailsPage = () => {
       updatedRooms.push(room);
     }
     setSelectedRooms(updatedRooms);
+  };
+
+  const totalPrice = selectedRooms.reduce(
+    (total, room) => total + room.total,
+    0
+  );
+
+  const noOfNights = () => {
+    const inDate = new Date(bookingData.checkIn);
+    const outDate = new Date(bookingData.checkOut);
+    const diffTime = Math.abs(outDate - inDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays || 1;
+  };
+
+  const handleBooking = async () => {
+    if (!auth?.user) {
+      router.push('/login');
+      return;
+    }
+
+    if (selectedRooms.length === 0) {
+      ErrorToast('Please select at least one room');
+      return;
+    }
+
+    const { checkIn, checkOut } = bookingData;
+    const today = new Date().setHours(0, 0, 0, 0);
+    const checkInDate = new Date(checkIn).setHours(0, 0, 0, 0);
+    const checkOutDate = new Date(checkOut).setHours(0, 0, 0, 0);
+
+    // 🛑 Validate date selection
+    if (!checkIn || !checkOut) {
+      ErrorToast('Please select both check-in and check-out dates');
+      return;
+    }
+
+    // 🛑 Validate that check-in is not in the past
+    if (checkInDate < today) {
+      ErrorToast('Check-in date cannot be in the past');
+      return;
+    }
+
+    // 🛑 Validate that check-out is after check-in
+    if (checkOutDate <= checkInDate) {
+      ErrorToast('Check-out date must be after the check-in date');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await CreateNewData({
+        endPoint: 'online-bookings',
+        payload: {
+          data: {
+            online_user: auth.user.id,
+            hotel: id,
+            room_categories: selectedRooms.map((r) => r.documentId),
+            adults: bookingData.adults,
+            childs: bookingData.children,
+            check_in: bookingData.checkIn,
+            check_out: bookingData.checkOut,
+            booking_status: 'Pending Approval',
+            nights: noOfNights(),
+            mop: 'Pay at Counter',
+          },
+        },
+      });
+
+      const result = await res.data.data;
+
+      if (result) {
+        router.push(
+          `/booking-status?status=success&bookingId=${result.id}&bookingDate=${result.createdAt}&checkIn=${result.check_in}&checkOut=${result.check_out}&currentStatus=${result.booking_status}`
+        );
+      } else {
+        ErrorToast('Booking failed, please try again');
+      }
+    } catch (error) {
+      console.error(error);
+      router.push(`/booking-status?status=failed`);
+    }
   };
 
   return (
@@ -404,185 +495,212 @@ const HotelDetailsPage = () => {
                           : '0 4px 20px rgba(0,0,0,0.1)',
                       }}
                     >
-                      {isMobile && (
-                        <Box sx={{ textAlign: 'center', mb: 2 }}>
+                      {loading ? (
+                        <>
                           <Box
                             sx={{
-                              width: 40,
-                              height: 4,
-                              bgcolor: 'grey.300',
-                              borderRadius: 2,
-                              display: 'inline-block',
-                              mb: 1,
+                              minHeight: 470,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              alignItems: 'center',
                             }}
-                          />
-                          <Typography variant="h6" fontWeight="600">
-                            Book Your Stay
-                          </Typography>
-                        </Box>
-                      )}
-
-                      {!isMobile && (
-                        <Typography
-                          variant="h5"
-                          component="h3"
-                          gutterBottom
-                          fontWeight="600"
-                        >
-                          Book Your Stay
-                        </Typography>
-                      )}
-
-                      <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
-                          <TextField
-                            fullWidth
-                            label="Check-in Date"
-                            type="date"
-                            value={bookingData.checkIn}
-                            onChange={(e) =>
-                              handleBookingChange('checkIn', e.target.value)
-                            }
-                            InputLabelProps={{ shrink: true }}
-                            inputProps={{
-                              min: new Date().toISOString().split('T')[0],
-                            }}
-                            size={isMobile ? 'small' : 'medium'}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
-                          <TextField
-                            fullWidth
-                            label="Check-out Date"
-                            type="date"
-                            value={bookingData.checkOut}
-                            onChange={(e) =>
-                              handleBookingChange('checkOut', e.target.value)
-                            }
-                            InputLabelProps={{ shrink: true }}
-                            inputProps={{
-                              min:
-                                bookingData.checkIn ||
-                                new Date().toISOString().split('T')[0],
-                            }}
-                            size={isMobile ? 'small' : 'medium'}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
-                          <TextField
-                            fullWidth
-                            label="Adults"
-                            type="number"
-                            value={bookingData.adults}
-                            onChange={(e) =>
-                              handleBookingChange('adults', e.target.value)
-                            }
-                            size={isMobile ? 'small' : 'medium'}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
-                          <TextField
-                            fullWidth
-                            label="Children"
-                            type="number"
-                            value={bookingData.children}
-                            onChange={(e) =>
-                              handleBookingChange('children', e.target.value)
-                            }
-                            size={isMobile ? 'small' : 'medium'}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12 }} sx={{ mt: 1 }}>
-                          <Divider />
-                        </Grid>
-                        <Grid size={{ xs: 12 }} sx={{ mt: 1 }}>
-                          {/* Price Summary */}
-                          <Box>
+                          >
+                            <CircularProgress size={100} color="error" />
                             <Typography
                               variant="h6"
+                              fontWeight={600}
+                              sx={{ mt: 2 }}
+                            >
+                              Processing your booking...
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Please do not refresh or navigate away from this
+                              page.
+                            </Typography>
+                          </Box>
+                        </>
+                      ) : (
+                        <>
+                          {isMobile && (
+                            <Box sx={{ textAlign: 'center', mb: 2 }}>
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 4,
+                                  bgcolor: 'grey.300',
+                                  borderRadius: 2,
+                                  display: 'inline-block',
+                                  mb: 1,
+                                }}
+                              />
+                              <Typography variant="h6" fontWeight="600">
+                                Book Your Stay
+                              </Typography>
+                            </Box>
+                          )}
+
+                          {!isMobile && (
+                            <Typography
+                              variant="h5"
+                              component="h3"
                               gutterBottom
                               fontWeight="600"
                             >
-                              Price Summary
+                              Book Your Stay
                             </Typography>
-                            <Box
+                          )}
+
+                          <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
+                              <TextField
+                                fullWidth
+                                label="Check-in Date"
+                                type="date"
+                                value={bookingData.checkIn}
+                                onChange={(e) =>
+                                  handleBookingChange('checkIn', e.target.value)
+                                }
+                                InputLabelProps={{ shrink: true }}
+                                inputProps={{
+                                  min: new Date().toISOString().split('T')[0],
+                                }}
+                                size={isMobile ? 'small' : 'medium'}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
+                              <TextField
+                                fullWidth
+                                label="Check-out Date"
+                                type="date"
+                                value={bookingData.checkOut}
+                                onChange={(e) =>
+                                  handleBookingChange(
+                                    'checkOut',
+                                    e.target.value
+                                  )
+                                }
+                                InputLabelProps={{ shrink: true }}
+                                inputProps={{
+                                  min:
+                                    bookingData.checkIn ||
+                                    new Date().toISOString().split('T')[0],
+                                }}
+                                size={isMobile ? 'small' : 'medium'}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
+                              <TextField
+                                fullWidth
+                                label="Adults"
+                                type="number"
+                                value={bookingData.adults}
+                                onChange={(e) =>
+                                  handleBookingChange('adults', e.target.value)
+                                }
+                                size={isMobile ? 'small' : 'medium'}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
+                              <TextField
+                                fullWidth
+                                label="Children"
+                                type="number"
+                                value={bookingData.children}
+                                onChange={(e) =>
+                                  handleBookingChange(
+                                    'children',
+                                    e.target.value
+                                  )
+                                }
+                                size={isMobile ? 'small' : 'medium'}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12 }} sx={{ mt: 1 }}>
+                              <Divider />
+                            </Grid>
+                            <Grid size={{ xs: 12 }} sx={{ mt: 1 }}>
+                              {/* Price Summary */}
+                              <Box>
+                                <Typography
+                                  variant="h6"
+                                  gutterBottom
+                                  fontWeight="600"
+                                >
+                                  Price Summary
+                                </Typography>
+                                <Box
+                                  sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    mb: 1,
+                                  }}
+                                >
+                                  <Typography variant="body2">
+                                    Room x {noOfNights()} nights
+                                  </Typography>
+                                  <Typography variant="body2">
+                                    ₹{totalPrice}
+                                  </Typography>
+                                </Box>
+
+                                <Divider sx={{ my: 1 }} />
+                                <Box
+                                  sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                  }}
+                                >
+                                  <Typography variant="h6" fontWeight="600">
+                                    Total
+                                  </Typography>
+                                  <Typography
+                                    variant="h6"
+                                    fontWeight="600"
+                                    sx={{ color: '#667eea' }}
+                                  >
+                                    ₹ {totalPrice * noOfNights()}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Grid>
+
+                            <Button
+                              variant="contained"
+                              size="large"
+                              fullWidth
+                              onClick={handleBooking}
+                              disabled={selectedRooms.length === 0}
                               sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                mb: 1,
+                                background: 'red',
+                                borderRadius: 3,
+                                py: isMobile ? 1.5 : 2,
+                                fontSize: isMobile ? '1rem' : '1.1rem',
+                                fontWeight: '600',
+                                textTransform: 'none',
+                                boxShadow: 'none',
+
+                                '&:disabled': {
+                                  background: 'grey.300',
+                                },
                               }}
                             >
-                              <Typography variant="body2">
-                                Room x 3 nights
-                              </Typography>
-                              <Typography variant="body2">$897</Typography>
-                            </Box>
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                mb: 1,
-                              }}
-                            >
-                              <Typography variant="body2">
-                                Taxes & Fees
-                              </Typography>
-                              <Typography variant="body2">$134.55</Typography>
-                            </Box>
-                            <Divider sx={{ my: 1 }} />
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                              }}
-                            >
-                              <Typography variant="h6" fontWeight="600">
-                                Total
-                              </Typography>
+                              Book Now
+                            </Button>
+
+                            {/* Trust Indicators */}
+                            <Box sx={{ textAlign: 'center' }}>
                               <Typography
-                                variant="h6"
-                                fontWeight="600"
-                                sx={{ color: '#667eea' }}
+                                variant="body2"
+                                color="text.secondary"
+                                gutterBottom
                               >
-                                $1,031.55
+                                🔒 Secure Booking · Easy Cancellation
                               </Typography>
                             </Box>
-                          </Box>
-                        </Grid>
-
-                        <Button
-                          variant="contained"
-                          size="large"
-                          fullWidth
-                          disabled={!selectedRoom}
-                          sx={{
-                            background: 'red',
-                            borderRadius: 3,
-                            py: isMobile ? 1.5 : 2,
-                            fontSize: isMobile ? '1rem' : '1.1rem',
-                            fontWeight: '600',
-                            textTransform: 'none',
-                            boxShadow: 'none',
-
-                            '&:disabled': {
-                              background: 'grey.300',
-                            },
-                          }}
-                        >
-                          Book Now
-                        </Button>
-
-                        {/* Trust Indicators */}
-                        <Box sx={{ textAlign: 'center' }}>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            gutterBottom
-                          >
-                            🔒 Secure Booking · Easy Cancellation
-                          </Typography>
-                        </Box>
-                      </Grid>
+                          </Grid>
+                        </>
+                      )}
                     </Paper>
                   </Box>
                 </Grid>
