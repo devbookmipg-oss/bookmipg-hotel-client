@@ -1,7 +1,7 @@
 // app/hotel/[id]/page.tsx
 'use client';
 
-import React, { use, useState } from 'react';
+import React, { Suspense, use, useState } from 'react';
 import {
   Container,
   Grid,
@@ -40,12 +40,17 @@ import {
   AcUnit,
   Tv,
   CheckCircleOutline,
+  FavoriteBorder,
 } from '@mui/icons-material';
 
 import { useTheme } from '@mui/material/styles';
-import { GetDataList, GetSingleData } from '@/utils/ApiFunctions';
+import { GetDataList, GetSingleData, UpdateData } from '@/utils/ApiFunctions';
 import { Preloader } from '@/components/common';
-import { ImageGallery } from '@/components/hotelDetailsComp';
+import { ImageGallery, About, Amenities } from '@/components/hotelDetailsComp';
+import { calculateReviewStats } from '@/utils/CalculateRating';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/context';
+import { ErrorToast, SuccessToast } from '@/utils/GenerateToast';
 
 // Mock data - replace with actual API calls
 const hotelData = {
@@ -115,17 +120,25 @@ const hotelData = {
   ],
 };
 
-export default function HotelDetailsPage({ params }) {
-  const { id } = use(params);
+const HotelDetailsPage = () => {
+  const { auth } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const id = searchParams.get('id');
+  const checkin = searchParams.get('checkin') || '';
+  const checkout = searchParams.get('checkout') || '';
+  const adults = searchParams.get('adults') || 1;
+  const children = searchParams.get('children') || 0;
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bookingData, setBookingData] = useState({
-    checkIn: '',
-    checkOut: '',
-    guests: 1,
+    checkIn: checkin,
+    checkOut: checkout,
+    adults: parseInt(adults, 10),
+    children: parseInt(children, 10),
   });
 
   const data = GetSingleData({
@@ -141,13 +154,30 @@ export default function HotelDetailsPage({ params }) {
     setBookingData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Calculate tomorrow's date for min date
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const minCheckOut = bookingData.checkIn
-    ? new Date(bookingData.checkIn)
-    : tomorrow;
-  minCheckOut.setDate(minCheckOut.getDate() + 1);
+  const isFav = data?.online_users?.some(
+    (u) => u.documentId === auth?.user?.id
+  );
+  const ratingValue = calculateReviewStats(data?.reviews);
+
+  const toggleFavorite = async () => {
+    try {
+      let newFavList = data?.online_users?.map((u) => u.documentId) || [];
+
+      if (isFav) newFavList = newFavList.filter((id) => id !== auth.user.id);
+      else newFavList.push(auth.user.id);
+
+      await UpdateData({
+        auth,
+        endPoint: 'hotels',
+        id: id,
+        payload: { data: { online_users: newFavList } },
+      });
+      SuccessToast(isFav ? 'Removed from wishlist' : 'Added to wishlist');
+    } catch (err) {
+      console.error(`error toggleFav: ${err}`);
+      ErrorToast('Something went wrong');
+    }
+  };
 
   return (
     <>
@@ -186,7 +216,7 @@ export default function HotelDetailsPage({ params }) {
                           component="h1"
                           fontWeight="700"
                           sx={{
-                            background: '#FF6B6B',
+                            background: 'red',
                             backgroundClip: 'text',
                             WebkitBackgroundClip: 'text',
                             color: 'transparent',
@@ -205,21 +235,33 @@ export default function HotelDetailsPage({ params }) {
                           }}
                         >
                           <Rating
-                            value={hotelData.rating}
+                            value={ratingValue.averageRating}
                             precision={0.1}
                             readOnly
                           />
                           <Typography variant="body1" color="text.secondary">
-                            {hotelData.rating} ({hotelData.reviewCount} reviews)
+                            {ratingValue.averageRating} (
+                            {ratingValue.totalReviews} reviews)
                           </Typography>
                         </Box>
                       </Box>
                       <Box sx={{ display: 'flex', gap: 1 }}>
-                        <IconButton sx={{ color: '#ff6b6b' }}>
-                          <Favorite />
-                        </IconButton>
-                        <IconButton sx={{ color: '#667eea' }}>
-                          <Share />
+                        <IconButton
+                          sx={{
+                            bgcolor: '#f2f2f2ff',
+                            border: '1px solid #d7d7d7ff',
+                          }}
+                          onClick={() =>
+                            auth.user
+                              ? toggleFavorite()
+                              : router.push('/signin')
+                          }
+                        >
+                          {isFav ? (
+                            <Favorite color="error" />
+                          ) : (
+                            <FavoriteBorder />
+                          )}
                         </IconButton>
                       </Box>
                     </Box>
@@ -241,76 +283,10 @@ export default function HotelDetailsPage({ params }) {
                   </Box>
 
                   {/* Amenities */}
-                  <Paper
-                    sx={{
-                      p: 3,
-                      mb: 4,
-                      background:
-                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      borderRadius: 3,
-                    }}
-                  >
-                    <Typography
-                      variant="h5"
-                      component="h2"
-                      gutterBottom
-                      fontWeight="600"
-                      color="white"
-                    >
-                      Amenities
-                    </Typography>
-                    <Grid container spacing={2}>
-                      {data?.amenities?.map((amenity, index) => (
-                        <Grid size={{ xs: 6, md: 3 }} key={index}>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 1,
-                            }}
-                          >
-                            <Box sx={{ color: 'white' }}>
-                              <CheckCircleOutline />
-                            </Box>
-                            <Typography
-                              variant="body2"
-                              color="white"
-                              fontWeight="500"
-                            >
-                              {amenity.title}
-                            </Typography>
-                          </Box>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Paper>
+                  <Amenities data={data} />
 
                   {/* About Section */}
-                  <Paper
-                    sx={{
-                      p: 3,
-                      mb: 4,
-                      borderRadius: 3,
-                      boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-                    }}
-                  >
-                    <Typography
-                      variant="h5"
-                      component="h2"
-                      gutterBottom
-                      fontWeight="600"
-                    >
-                      About This Hotel
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      color="text.secondary"
-                      paragraph
-                      sx={{ lineHeight: 1.6 }}
-                    >
-                      {data.about}
-                    </Typography>
-                  </Paper>
+                  <About data={data} />
 
                   {/* Rooms Section */}
                   <Box sx={{ mb: 4 }}>
@@ -484,8 +460,9 @@ export default function HotelDetailsPage({ params }) {
                       sx={{
                         p: 3,
                         background:
-                          'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+                          'linear-gradient(135deg, #ffffffff , #fff4f4ff)',
                         borderRadius: isMobile ? '16px 16px 0 0' : 3,
+                        border: '5px solid red',
                         boxShadow: isMobile
                           ? 'none'
                           : '0 4px 20px rgba(0,0,0,0.1)',
@@ -520,134 +497,122 @@ export default function HotelDetailsPage({ params }) {
                         </Typography>
                       )}
 
-                      <Stack spacing={2}>
-                        <TextField
-                          fullWidth
-                          label="Check-in Date"
-                          type="date"
-                          value={bookingData.checkIn}
-                          onChange={(e) =>
-                            handleBookingChange('checkIn', e.target.value)
-                          }
-                          InputLabelProps={{ shrink: true }}
-                          inputProps={{
-                            min: new Date().toISOString().split('T')[0],
-                          }}
-                          size={isMobile ? 'small' : 'medium'}
-                        />
-
-                        <TextField
-                          fullWidth
-                          label="Check-out Date"
-                          type="date"
-                          value={bookingData.checkOut}
-                          onChange={(e) =>
-                            handleBookingChange('checkOut', e.target.value)
-                          }
-                          InputLabelProps={{ shrink: true }}
-                          inputProps={{
-                            min:
-                              bookingData.checkIn ||
-                              new Date().toISOString().split('T')[0],
-                          }}
-                          size={isMobile ? 'small' : 'medium'}
-                        />
-
-                        <FormControl
-                          fullWidth
-                          size={isMobile ? 'small' : 'medium'}
-                        >
-                          <InputLabel>Guests</InputLabel>
-                          <Select
-                            value={bookingData.guests}
-                            label="Guests"
+                      <Grid container spacing={2}>
+                        <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
+                          <TextField
+                            fullWidth
+                            label="Check-in Date"
+                            type="date"
+                            value={bookingData.checkIn}
                             onChange={(e) =>
-                              handleBookingChange('guests', e.target.value)
+                              handleBookingChange('checkIn', e.target.value)
                             }
-                          >
-                            {[1, 2, 3, 4, 5, 6].map((num) => (
-                              <MenuItem key={num} value={num}>
-                                {num} {num === 1 ? 'Guest' : 'Guests'}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-
-                        <FormControl
-                          fullWidth
-                          size={isMobile ? 'small' : 'medium'}
-                        >
-                          <InputLabel>Select Room</InputLabel>
-                          <Select
-                            value={selectedRoom}
-                            label="Select Room"
-                            onChange={(e) => setSelectedRoom(e.target.value)}
-                          >
-                            {hotelData.rooms.map((room) => (
-                              <MenuItem
-                                key={room.id}
-                                value={room.id.toString()}
-                              >
-                                {room.name} - ${room.price}/night
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-
-                        <Divider />
-
-                        {/* Price Summary */}
-                        <Box>
-                          <Typography
-                            variant="h6"
-                            gutterBottom
-                            fontWeight="600"
-                          >
-                            Price Summary
-                          </Typography>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              mb: 1,
+                            InputLabelProps={{ shrink: true }}
+                            inputProps={{
+                              min: new Date().toISOString().split('T')[0],
                             }}
-                          >
-                            <Typography variant="body2">
-                              Room x 3 nights
-                            </Typography>
-                            <Typography variant="body2">$897</Typography>
-                          </Box>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              mb: 1,
+                            size={isMobile ? 'small' : 'medium'}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
+                          <TextField
+                            fullWidth
+                            label="Check-out Date"
+                            type="date"
+                            value={bookingData.checkOut}
+                            onChange={(e) =>
+                              handleBookingChange('checkOut', e.target.value)
+                            }
+                            InputLabelProps={{ shrink: true }}
+                            inputProps={{
+                              min:
+                                bookingData.checkIn ||
+                                new Date().toISOString().split('T')[0],
                             }}
-                          >
-                            <Typography variant="body2">
-                              Taxes & Fees
-                            </Typography>
-                            <Typography variant="body2">$134.55</Typography>
-                          </Box>
-                          <Divider sx={{ my: 1 }} />
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                            }}
-                          >
-                            <Typography variant="h6" fontWeight="600">
-                              Total
-                            </Typography>
+                            size={isMobile ? 'small' : 'medium'}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
+                          <TextField
+                            fullWidth
+                            label="Adults"
+                            type="number"
+                            value={bookingData.adults}
+                            onChange={(e) =>
+                              handleBookingChange('adults', e.target.value)
+                            }
+                            size={isMobile ? 'small' : 'medium'}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }} sx={{ mt: 1 }}>
+                          <TextField
+                            fullWidth
+                            label="Children"
+                            type="number"
+                            value={bookingData.children}
+                            onChange={(e) =>
+                              handleBookingChange('children', e.target.value)
+                            }
+                            size={isMobile ? 'small' : 'medium'}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12 }} sx={{ mt: 1 }}>
+                          <Divider />
+                        </Grid>
+                        <Grid size={{ xs: 12 }} sx={{ mt: 1 }}>
+                          {/* Price Summary */}
+                          <Box>
                             <Typography
                               variant="h6"
+                              gutterBottom
                               fontWeight="600"
-                              sx={{ color: '#667eea' }}
                             >
-                              $1,031.55
+                              Price Summary
                             </Typography>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mb: 1,
+                              }}
+                            >
+                              <Typography variant="body2">
+                                Room x 3 nights
+                              </Typography>
+                              <Typography variant="body2">$897</Typography>
+                            </Box>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mb: 1,
+                              }}
+                            >
+                              <Typography variant="body2">
+                                Taxes & Fees
+                              </Typography>
+                              <Typography variant="body2">$134.55</Typography>
+                            </Box>
+                            <Divider sx={{ my: 1 }} />
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                              }}
+                            >
+                              <Typography variant="h6" fontWeight="600">
+                                Total
+                              </Typography>
+                              <Typography
+                                variant="h6"
+                                fontWeight="600"
+                                sx={{ color: '#667eea' }}
+                              >
+                                $1,031.55
+                              </Typography>
+                            </Box>
                           </Box>
-                        </Box>
+                        </Grid>
 
                         <Button
                           variant="contained"
@@ -655,19 +620,14 @@ export default function HotelDetailsPage({ params }) {
                           fullWidth
                           disabled={!selectedRoom}
                           sx={{
-                            background:
-                              'linear-gradient(45deg, #FF6B6B, #4ECDC4)',
+                            background: 'red',
                             borderRadius: 3,
                             py: isMobile ? 1.5 : 2,
                             fontSize: isMobile ? '1rem' : '1.1rem',
                             fontWeight: '600',
                             textTransform: 'none',
                             boxShadow: 'none',
-                            '&:hover': {
-                              boxShadow: '0 4px 12px rgba(255, 107, 107, 0.3)',
-                              background:
-                                'linear-gradient(45deg, #FF8E8E, #6ADBD1)',
-                            },
+
                             '&:disabled': {
                               background: 'grey.300',
                             },
@@ -683,9 +643,9 @@ export default function HotelDetailsPage({ params }) {
                             color="text.secondary"
                             gutterBottom
                           >
-                            🔒 Secure Booking · Free Cancellation
+                            🔒 Secure Booking · Easy Cancellation
                           </Typography>
-                          <AvatarGroup
+                          {/* <AvatarGroup
                             max={4}
                             sx={{ justifyContent: 'center', mb: 1 }}
                           >
@@ -712,9 +672,9 @@ export default function HotelDetailsPage({ params }) {
                           </AvatarGroup>
                           <Typography variant="caption" color="text.secondary">
                             Booked by 1247+ guests today
-                          </Typography>
+                          </Typography> */}
                         </Box>
-                      </Stack>
+                      </Grid>
                     </Paper>
                   </Box>
 
@@ -728,4 +688,13 @@ export default function HotelDetailsPage({ params }) {
       )}
     </>
   );
-}
+};
+
+const Page = () => {
+  return (
+    <Suspense>
+      <HotelDetailsPage />
+    </Suspense>
+  );
+};
+export default Page;

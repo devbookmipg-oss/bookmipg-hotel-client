@@ -189,7 +189,7 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
                       sx={{ ml: 1 }}
                     >
                       {ratingValue.averageRating || 0} (
-                      {ratingValue.totalReviews || 0})
+                      {ratingValue.totalReviews || 0} reviews)
                     </Typography>
                   </Box>
 
@@ -240,7 +240,7 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
                     </Box>
                     <Button
                       onClick={() =>
-                        router.push(`/hotels/${property.documentId}`)
+                        router.push(`/hotels/details?id=${property.documentId}`)
                       }
                       variant="contained"
                       size="small"

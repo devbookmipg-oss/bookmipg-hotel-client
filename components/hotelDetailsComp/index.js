@@ -1,3 +1,6 @@
 import ImageGallery from './ImageGallery';
+import About from './About';
 
-export { ImageGallery };
+import Amenities from './Amenities';
+
+export { ImageGallery, About, Amenities };

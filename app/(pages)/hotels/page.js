@@ -41,6 +41,10 @@ const HotelsPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const queryLocation = searchParams.get('location') || '';
+  const checkin = searchParams.get('checkin') || '';
+  const checkout = searchParams.get('checkout') || '';
+  const adults = searchParams.get('adults') || '';
+  const children = searchParams.get('children') || '';
 
   // Always call hooks at the top — no conditional returns before this
   const hotels = GetDataList({ endPoint: 'hotels' }) || [];
@@ -379,7 +383,7 @@ const HotelsPage = () => {
                           sx={{ ml: 1 }}
                         >
                           {ratingValue.averageRating || 0} (
-                          {ratingValue.totalReviews || 0})
+                          {ratingValue.totalReviews || 0} reviews)
                         </Typography>
                       </Box>
 
@@ -442,7 +446,9 @@ const HotelsPage = () => {
                         </Box>
                         <Button
                           onClick={() =>
-                            router.push(`/hotels/${property.documentId}`)
+                            router.push(
+                              `/hotels/details?id=${property.documentId}&checkin=${checkin}&checkout=${checkout}&adults=${adults}&children=${children}`
+                            )
                           }
                           variant="contained"
                           size="small"

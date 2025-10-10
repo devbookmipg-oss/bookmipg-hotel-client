@@ -36,8 +36,6 @@ const DesktopFooterWrapper = styled(Box)(({ theme }) => ({
     display: 'none',
   },
 }));
-
-// Mobile Bottom Nav Wrapper
 const MobileNavWrapper = styled(Paper)(({ theme }) => ({
   display: 'none',
   [theme.breakpoints.down('sm')]: {
@@ -49,12 +47,15 @@ const MobileNavWrapper = styled(Paper)(({ theme }) => ({
     left: 0,
     right: 0,
     height: 70,
-    backdropFilter: 'blur(10px)', // glass effect
-    backgroundColor: 'rgba(28,28,30,0.95)',
+    zIndex: 1300, // ✅ Above all other content (matches MUI modal zIndex)
+    backdropFilter: 'blur(10px)',
+    backgroundColor: 'rgba(28, 28, 30, 0.95)',
     borderTop: '1px solid rgba(255,255,255,0.2)',
-    zIndex: 1200,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
+    margin: 0,
+    paddingBottom: 'env(safe-area-inset-bottom)', // ✅ handles iPhone bottom bar
+    WebkitTransform: 'translateZ(0)', // ✅ prevents layout shift on first render
   },
 }));
 
@@ -247,7 +248,7 @@ export default function Footer() {
       </DesktopFooterWrapper>
 
       {/* 📱 Mobile Bottom Navigation */}
-      <MobileNavWrapper elevation={6}>
+      <MobileNavWrapper>
         <BottomNavigation
           value={value}
           onChange={(event, newValue) => setValue(newValue)}

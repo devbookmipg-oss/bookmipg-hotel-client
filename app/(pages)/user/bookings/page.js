@@ -70,7 +70,7 @@ const Page = () => {
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
-        height="100vh"
+        height="70vh"
         sx={{
           bgcolor: 'background.default',
           textAlign: 'center',

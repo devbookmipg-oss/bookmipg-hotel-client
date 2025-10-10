@@ -203,7 +203,7 @@ export default function Header() {
             <IconButton
               onClick={() => {
                 if (auth.user) {
-                  handleNavigate('/user/favorites');
+                  handleNavigate('/user/wishlist');
                 } else {
                   handleNavigate('/signin');
                 }
