@@ -78,7 +78,7 @@ const Page = () => {
       sx={{
         bgcolor: 'background.default',
         minHeight: '100vh',
-        pb: 4,
+        pb: 10,
       }}
     >
       {/* HEADER */}
@@ -88,7 +88,7 @@ const Page = () => {
           background: 'linear-gradient(135deg, #4f46e5, #9333ea)',
           color: 'white',
           textAlign: 'center',
-          py: 5,
+          py: 3,
           borderBottomLeftRadius: { xs: 30, md: 50 },
           borderBottomRightRadius: { xs: 30, md: 50 },
           boxShadow: 3,

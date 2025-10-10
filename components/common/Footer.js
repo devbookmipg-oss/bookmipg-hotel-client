@@ -107,7 +107,7 @@ export default function Footer() {
             </Typography>
             <Typography
               component={Link}
-              href="/about"
+              href="/about-us"
               sx={{
                 display: 'block',
                 mb: 1,
@@ -274,7 +274,7 @@ export default function Footer() {
           />
           <StyledBottomNavigationAction
             component={Link}
-            href="/search"
+            href="/hotels"
             label="Search"
             icon={<Search />}
           />
