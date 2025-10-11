@@ -20,12 +20,9 @@ const Page = () => {
   return (
     <>
       <Header />
-      <Box>
-        <SearchBarComponent locations={locations} />
-
-        <QuickCategoriesGrid />
-        <FeaturedPropertiesCarousel hotels={hotels} />
-      </Box>
+      <SearchBarComponent locations={locations} />
+      <QuickCategoriesGrid />
+      <FeaturedPropertiesCarousel hotels={hotels} />
       <Footer />
     </>
   );

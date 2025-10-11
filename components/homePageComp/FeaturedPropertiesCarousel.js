@@ -1,6 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Slider from 'react-slick';
+import { useState } from 'react';
 import {
   Box,
   Paper,
@@ -12,29 +11,16 @@ import {
 } from '@mui/material';
 import { Favorite, FavoriteBorder, LocationOn } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
+import Slider from 'react-slick';
 import { useAuth } from '@/context';
 import { UpdateData } from '@/utils/ApiFunctions';
 import { ErrorToast, SuccessToast } from '@/utils/GenerateToast';
 import { calculateReviewStats } from '@/utils/CalculateRating';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
 
 export default function FeaturedPropertiesCarousel({ hotels }) {
   const { auth } = useAuth();
   const router = useRouter();
-  const [windowWidth, setWindowWidth] = useState(1200);
 
-  // ✅ Keep slider responsive after mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const handleResize = () => setWindowWidth(window.innerWidth);
-      handleResize();
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }
-  }, []);
-
-  // ✅ Toggle favorite hotel
   const toggleFavorite = async (propertyId, isFav) => {
     try {
       const property = hotels.find((p) => p.documentId === propertyId);
@@ -51,9 +37,7 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
         auth,
         endPoint: 'hotels',
         id: propertyId,
-        payload: {
-          data: { online_users: newFavList },
-        },
+        payload: { data: { online_users: newFavList } },
       });
 
       SuccessToast(isFav ? 'Removed from wishlist' : 'Added to wishlist');
@@ -63,17 +47,20 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
     }
   };
 
-  // ✅ Slick Carousel Settings
-  const settings = {
-    dots: false,
+  // 🔧 Slick slider settings
+  const sliderSettings = {
+    dots: true,
     infinite: true,
-    speed: 600,
+    speed: 700,
     slidesToShow: 4,
     slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    pauseOnHover: true,
     arrows: false,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    responsive: [
+      { breakpoint: 1200, settings: { slidesToShow: 2 } },
+      { breakpoint: 800, settings: { slidesToShow: 1 } },
+    ],
   };
 
   return (
@@ -82,9 +69,6 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
         px: { xs: 1, sm: 2, md: 4 },
         mt: 5,
         mb: 10,
-        overflow: 'visible !important', // ✅ Prevent fixed footer conflicts
-        position: 'relative',
-        zIndex: 1,
       }}
     >
       <Typography
@@ -97,203 +81,179 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
         🌟 Featured Properties
       </Typography>
 
-      {/* ✅ Keyed by window width to fix SSR mobile issue */}
-      <Box sx={{ overflow: 'visible' }}>
-        <Slider key={windowWidth} {...settings}>
-          {hotels?.slice(0, 10).map((property) => {
-            const isFav = property?.online_users?.some(
-              (u) => u.documentId === auth?.user?.id
-            );
-            const ratingValue = calculateReviewStats(property.reviews);
+      {/* 🧭 Slider container */}
+      <Slider {...sliderSettings}>
+        {hotels?.slice(0, 10).map((property) => {
+          const isFav = property?.online_users?.some(
+            (u) => u.documentId === auth?.user?.id
+          );
+          const ratingValue = calculateReviewStats(property.reviews);
 
-            return (
-              <Box
-                key={property.documentId}
+          return (
+            <Box key={property.documentId} sx={{ px: 1 }}>
+              <Paper
+                elevation={3}
                 sx={{
-                  px: { xs: 0.5, sm: 1.5 },
-                  boxSizing: 'border-box',
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                  transition: 'all 0.35s ease',
+                  '&:hover': {
+                    transform: 'translateY(-6px)',
+                    boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
+                  },
                 }}
               >
-                <Paper
-                  elevation={3}
+                {/* 🖼️ Image */}
+                <Box
                   sx={{
-                    borderRadius: 3,
-                    overflow: 'hidden',
-                    transition: 'all 0.35s ease',
-                    '&:hover': {
-                      transform: 'translateY(-6px)',
-                      boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
-                    },
+                    height: { xs: 180, sm: 200 },
+                    background: `url(${property?.banner_image?.url}) center/cover no-repeat`,
+                    position: 'relative',
                   }}
                 >
-                  {/* 🖼️ Hotel Image */}
+                  <IconButton
+                    onClick={() =>
+                      auth.user
+                        ? toggleFavorite(property.documentId, isFav)
+                        : router.push('/signin')
+                    }
+                    sx={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 10,
+                      bgcolor: 'rgba(255,255,255,0.9)',
+                      '&:hover': { bgcolor: 'white' },
+                    }}
+                    size="small"
+                  >
+                    {isFav ? <Favorite color="error" /> : <FavoriteBorder />}
+                  </IconButton>
+                </Box>
+
+                {/* 🏨 Details */}
+                <Box sx={{ p: 2 }}>
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    gutterBottom
+                    noWrap
+                  >
+                    {property.hotel_name}
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <LocationOn
+                      sx={{ fontSize: 16, color: 'text.secondary', mr: 0.5 }}
+                    />
+                    <Typography variant="body2" color="text.secondary" noWrap>
+                      {property.hotel_address_line1}, {property.hotel_district}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Rating
+                      value={ratingValue.averageRating || 0}
+                      readOnly
+                      size="small"
+                    />
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ ml: 1 }}
+                    >
+                      {ratingValue.averageRating || 0} (
+                      {ratingValue.totalReviews || 0} reviews)
+                    </Typography>
+                  </Box>
+
+                  {/* 🧩 Amenities */}
                   <Box
                     sx={{
-                      height: { xs: 180, sm: 200 },
-                      background: `url(${property?.banner_image?.url}) center/cover no-repeat`,
-                      position: 'relative',
+                      display: 'flex',
+                      gap: 0.5,
+                      mb: 2,
+                      flexWrap: 'wrap',
                     }}
                   >
-                    <IconButton
-                      onClick={() =>
-                        auth.user
-                          ? toggleFavorite(property.documentId, isFav)
-                          : router.push('/signin')
-                      }
-                      sx={{
-                        position: 'absolute',
-                        top: 10,
-                        right: 10,
-                        bgcolor: 'rgba(255,255,255,0.9)',
-                        '&:hover': { bgcolor: 'white' },
-                      }}
-                      size="small"
-                    >
-                      {isFav ? <Favorite color="error" /> : <FavoriteBorder />}
-                    </IconButton>
+                    {property.amenities.slice(0, 3).map((amenity, idx) => (
+                      <Chip
+                        key={idx}
+                        label={amenity.title}
+                        size="small"
+                        variant="outlined"
+                        sx={{ fontSize: '0.7rem', height: 24 }}
+                      />
+                    ))}
+                    {property.amenities.length > 3 && (
+                      <Chip
+                        label={`+${property.amenities.length - 3}`}
+                        size="small"
+                        variant="outlined"
+                        sx={{ fontSize: '0.7rem', height: 24 }}
+                      />
+                    )}
                   </Box>
 
-                  {/* 🏨 Details */}
-                  <Box sx={{ p: 2 }}>
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
-                      gutterBottom
-                      noWrap
-                    >
-                      {property.hotel_name}
-                    </Typography>
-
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        mb: 1,
-                      }}
-                    >
-                      <LocationOn
-                        sx={{ fontSize: 16, color: 'text.secondary', mr: 0.5 }}
-                      />
-                      <Typography variant="body2" color="text.secondary" noWrap>
-                        {property.hotel_address_line1},{' '}
-                        {property.hotel_district}
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        mb: 2,
-                      }}
-                    >
-                      <Rating
-                        value={ratingValue.averageRating || 0}
-                        readOnly
-                        size="small"
-                      />
+                  {/* 💰 Price + Book Button */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Box>
                       <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ ml: 1 }}
+                        variant="h6"
+                        fontWeight="bold"
+                        color="error"
+                        sx={{ display: 'flex', alignItems: 'center' }}
                       >
-                        {ratingValue.averageRating || 0} (
-                        {ratingValue.totalReviews || 0} reviews)
+                        ₹{property.discounted_base_price || 'N/A'}
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            textDecoration: 'line-through',
+                            ml: 1,
+                          }}
+                        >
+                          ₹{property.base_price || 'N/A'}
+                        </Typography>
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        per night
                       </Typography>
                     </Box>
 
-                    {/* 🧩 Amenities */}
-                    <Box
+                    <Button
+                      onClick={() =>
+                        router.push(`/hotels/details?id=${property.documentId}`)
+                      }
+                      variant="contained"
+                      size="small"
                       sx={{
-                        display: 'flex',
-                        gap: 0.5,
-                        mb: 2,
-                        flexWrap: 'wrap',
-                      }}
-                    >
-                      {property.amenities.slice(0, 3).map((amenity, idx) => (
-                        <Chip
-                          key={idx}
-                          label={amenity.title}
-                          size="small"
-                          variant="outlined"
-                          sx={{ fontSize: '0.7rem', height: 24 }}
-                        />
-                      ))}
-                      {property.amenities.length > 3 && (
-                        <Chip
-                          label={`+${property.amenities.length - 3}`}
-                          size="small"
-                          variant="outlined"
-                          sx={{ fontSize: '0.7rem', height: 24 }}
-                        />
-                      )}
-                    </Box>
-
-                    {/* 💰 Price + Book Button */}
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Box>
-                        <Typography
-                          variant="h6"
-                          fontWeight="bold"
-                          color="error"
-                          sx={{ display: 'flex', alignItems: 'center' }}
-                        >
-                          ₹{property.discounted_base_price || 'N/A'}
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              textDecoration: 'line-through',
-                              ml: 1,
-                            }}
-                          >
-                            ₹{property.base_price || 'N/A'}
-                          </Typography>
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          per night
-                        </Typography>
-                      </Box>
-
-                      <Button
-                        onClick={() =>
-                          router.push(
-                            `/hotels/details?id=${property.documentId}`
-                          )
-                        }
-                        variant="contained"
-                        size="small"
-                        sx={{
-                          textTransform: 'none',
-                          borderRadius: 2,
-                          px: 2.5,
-                          fontWeight: 'bold',
+                        textTransform: 'none',
+                        borderRadius: 2,
+                        px: 2.5,
+                        fontWeight: 'bold',
+                        background: 'linear-gradient(90deg, #ff1744, #f50057)',
+                        '&:hover': {
                           background:
-                            'linear-gradient(90deg, #ff1744, #f50057)',
-                          '&:hover': {
-                            background:
-                              'linear-gradient(90deg, #f50057, #ff1744)',
-                          },
-                        }}
-                      >
-                        Book Now
-                      </Button>
-                    </Box>
+                            'linear-gradient(90deg, #f50057, #ff1744)',
+                        },
+                      }}
+                    >
+                      Book Now
+                    </Button>
                   </Box>
-                </Paper>
-              </Box>
-            );
-          })}
-        </Slider>
-      </Box>
+                </Box>
+              </Paper>
+            </Box>
+          );
+        })}
+      </Slider>
     </Box>
   );
 }
