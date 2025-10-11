@@ -7,24 +7,13 @@ import {
   Typography,
   IconButton,
   Popover,
-  Chip,
   Fade,
   useTheme,
   useMediaQuery,
   Autocomplete,
   Snackbar,
 } from '@mui/material';
-import {
-  Search,
-  LocationOn,
-  CalendarToday,
-  Person,
-  MyLocation,
-  TrendingUp,
-  Hotel,
-  Villa,
-  Apartment,
-} from '@mui/icons-material';
+import { Search, LocationOn, CalendarToday, Person } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { GetCustomDate } from '@/utils/DateFetcher';
 import { useRouter } from 'next/navigation';
@@ -38,7 +27,7 @@ export default function SearchBarComponent({ locations }) {
   const tomorrow = new Date();
   tomorrow.setDate(today.getDate() + 1);
 
-  const formatDate = (date) => date.toISOString().split('T')[0]; // yyyy-mm-dd format for input[type="date"]
+  const formatDate = (date) => date.toISOString().split('T')[0];
 
   const [searchData, setSearchData] = useState({
     location: '',
@@ -46,19 +35,11 @@ export default function SearchBarComponent({ locations }) {
     checkOut: formatDate(tomorrow),
     guests: '2 Adults, 0 Children',
   });
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [activeField, setActiveField] = useState(null);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
-
-  useEffect(() => {
-    setSearchData((prev) => ({
-      ...prev,
-      guests: `${adults} ${adults === 1 ? 'Adult' : 'Adults'}, ${children} ${
-        children === 1 ? 'Child' : 'Children'
-      }`,
-    }));
-  }, [adults, children]);
 
   const handleFieldClick = (field, event) => {
     setActiveField(field);
@@ -71,6 +52,15 @@ export default function SearchBarComponent({ locations }) {
   };
 
   const open = Boolean(anchorEl);
+
+  useEffect(() => {
+    setSearchData((prev) => ({
+      ...prev,
+      guests: `${adults} ${adults === 1 ? 'Adult' : 'Adults'}, ${children} ${
+        children === 1 ? 'Child' : 'Children'
+      }`,
+    }));
+  }, [adults, children]);
 
   const [snackbar, setSnackbar] = useState({ open: false, message: '' });
 
@@ -98,67 +88,9 @@ export default function SearchBarComponent({ locations }) {
 
   const renderPopoverContent = () => {
     switch (activeField) {
-      case 'location':
-        return (
-          <Box sx={{ p: 1, width: isMobile ? 280 : 350 }}>
-            {/* Searchable Location Dropdown */}
-            <Autocomplete
-              freeSolo
-              options={locations || []}
-              getOptionLabel={(option) => option.city || option.name || ''}
-              onChange={(e, value) => {
-                if (value) {
-                  setSearchData({
-                    ...searchData,
-                    location: value.city || value.name,
-                  });
-                  handleClose();
-                }
-              }}
-              renderOption={(props, option) => (
-                <Box
-                  component="li"
-                  {...props}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    py: 1,
-                    px: 1.5,
-                    '&:hover': { bgcolor: 'grey.100' },
-                  }}
-                >
-                  <LocationOn color="primary" fontSize="small" />
-                  <Box>
-                    <Typography fontWeight="medium">{option.city}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {option.state}, {option.pincode}
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Search city or hotel name"
-                  fullWidth
-                  variant="outlined"
-                  sx={{
-                    mb: 2,
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 3,
-                    },
-                  }}
-                />
-              )}
-            />
-          </Box>
-        );
-
       case 'dates':
         return (
-          <Box sx={{ p: 1, width: isMobile ? 300 : 400 }}>
-            {/* Date Pickers */}
+          <Box sx={{ p: 2, width: isMobile ? 300 : 400 }}>
             <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
               <TextField
                 label="Check-in"
@@ -169,11 +101,7 @@ export default function SearchBarComponent({ locations }) {
                   setSearchData({ ...searchData, checkIn: e.target.value })
                 }
                 InputLabelProps={{ shrink: true }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                  },
-                }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
               <TextField
                 label="Check-out"
@@ -184,14 +112,9 @@ export default function SearchBarComponent({ locations }) {
                   setSearchData({ ...searchData, checkOut: e.target.value })
                 }
                 InputLabelProps={{ shrink: true }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                  },
-                }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Box>
-
             <Button
               variant="contained"
               fullWidth
@@ -210,8 +133,7 @@ export default function SearchBarComponent({ locations }) {
 
       case 'guests':
         return (
-          <Box sx={{ p: 1, width: isMobile ? 280 : 320 }}>
-            {/* Adults Counter */}
+          <Box sx={{ p: 2, width: isMobile ? 280 : 320 }}>
             <Box
               sx={{
                 display: 'flex',
@@ -242,12 +164,7 @@ export default function SearchBarComponent({ locations }) {
                 >
                   -
                 </IconButton>
-                <Typography
-                  fontWeight="bold"
-                  sx={{ minWidth: 20, textAlign: 'center' }}
-                >
-                  {adults}
-                </Typography>
+                <Typography fontWeight="bold">{adults}</Typography>
                 <IconButton
                   size="small"
                   onClick={() => setAdults(adults + 1)}
@@ -262,7 +179,6 @@ export default function SearchBarComponent({ locations }) {
               </Box>
             </Box>
 
-            {/* Children Counter */}
             <Box
               sx={{
                 display: 'flex',
@@ -292,12 +208,7 @@ export default function SearchBarComponent({ locations }) {
                 >
                   -
                 </IconButton>
-                <Typography
-                  fontWeight="bold"
-                  sx={{ minWidth: 20, textAlign: 'center' }}
-                >
-                  {children}
-                </Typography>
+                <Typography fontWeight="bold">{children}</Typography>
                 <IconButton
                   size="small"
                   onClick={() => setChildren(children + 1)}
@@ -339,7 +250,7 @@ export default function SearchBarComponent({ locations }) {
       sx={{
         position: 'relative',
         backgroundImage:
-          'url(https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)',
+          'url(https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80)',
         backgroundPosition: 'center',
         backgroundSize: 'cover',
         height: isMobile ? 400 : 500,
@@ -349,35 +260,30 @@ export default function SearchBarComponent({ locations }) {
         overflow: 'hidden',
       }}
     >
-      {/* Dark Overlay */}
+      {/* Overlay */}
       <Box
         sx={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          inset: 0,
           background:
             'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%)',
           zIndex: 1,
         }}
       />
 
-      {/* Animated Background Elements */}
+      {/* Animated light */}
       <Box
         sx={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          inset: 0,
           background:
-            'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%)',
+            'radial-gradient(circle at 20% 80%, rgba(120,119,198,0.3) 0%, transparent 50%)',
           animation: 'pulse 4s ease-in-out infinite alternate',
           zIndex: 1,
         }}
       />
 
+      {/* Main Content */}
       <Box
         sx={{
           position: 'relative',
@@ -391,7 +297,6 @@ export default function SearchBarComponent({ locations }) {
       >
         {!isMobile && (
           <>
-            {/* Main Title */}
             <Fade in timeout={800}>
               <Typography
                 variant="h4"
@@ -399,16 +304,12 @@ export default function SearchBarComponent({ locations }) {
                 textAlign="center"
                 color="white"
                 gutterBottom
-                sx={{
-                  textShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                  mb: 1,
-                }}
+                sx={{ textShadow: '0 4px 12px rgba(0,0,0,0.5)' }}
               >
                 Discover Your Perfect Escape
               </Typography>
             </Fade>
 
-            {/* Subtitle */}
             <Fade in timeout={1000}>
               <Typography
                 variant="h6"
@@ -419,7 +320,6 @@ export default function SearchBarComponent({ locations }) {
                   textShadow: '0 2px 8px rgba(0,0,0,0.5)',
                   mb: 4,
                   maxWidth: '600px',
-                  mx: 'auto',
                 }}
               >
                 Find amazing deals on hotels, resorts, and vacation rentals
@@ -439,11 +339,9 @@ export default function SearchBarComponent({ locations }) {
               borderRadius: 4,
               background: 'rgba(255, 255, 255, 0.95)',
               backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
             }}
           >
-            {/* Search Form */}
             <Paper
               sx={{
                 display: 'flex',
@@ -451,37 +349,21 @@ export default function SearchBarComponent({ locations }) {
                 p: 1,
                 borderRadius: 3,
                 bgcolor: '#ffffff96',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-                border: '1px solid rgba(0, 0, 0, 0.05)',
                 flexDirection: isMobile ? 'column' : 'row',
                 gap: isMobile ? 1 : 0,
               }}
             >
-              {/* Location Field */}
+              {/* Inline Location */}
               <Box
                 sx={{
-                  flex: isMobile ? 'auto' : 1,
+                  flex: 1.5,
                   p: 1,
-                  cursor: 'pointer',
                   borderRight: isMobile ? 'none' : '1px solid',
                   borderBottom: isMobile ? '1px solid' : 'none',
                   borderColor: 'divider',
-                  width: isMobile ? '100%' : 'auto',
-                  borderRadius: isMobile ? 2 : 0,
-                  '&:hover': {
-                    bgcolor: 'grey.50',
-                  },
                 }}
-                onClick={(e) => handleFieldClick('location', e)}
               >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    mb: 0.5,
-                  }}
-                >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <LocationOn sx={{ fontSize: 20, color: 'error.main' }} />
                   <Typography
                     variant="body2"
@@ -492,45 +374,83 @@ export default function SearchBarComponent({ locations }) {
                     LOCATION
                   </Typography>
                 </Box>
-                <Typography
-                  variant="body1"
-                  fontWeight="medium"
-                  noWrap
-                  sx={{
-                    color: searchData.location
-                      ? 'text.primary'
-                      : 'text.secondary',
+                <Autocomplete
+                  freeSolo
+                  options={locations || []}
+                  getOptionLabel={(option) => option.city || option.name || ''}
+                  onChange={(e, value) => {
+                    if (value)
+                      setSearchData({
+                        ...searchData,
+                        location: value.city || value.name,
+                      });
                   }}
-                >
-                  {searchData.location || 'Where are you going?'}
-                </Typography>
+                  renderOption={(props, option) => (
+                    <Box
+                      component="li"
+                      {...props}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        py: 1,
+                        px: 1.5,
+                        '&:hover': { bgcolor: 'grey.100' },
+                      }}
+                    >
+                      <LocationOn color="primary" fontSize="small" />
+                      <Box>
+                        <Typography fontWeight="medium">
+                          {option.city}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {option.state}, {option.pincode}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Search city or hotel name"
+                      fullWidth
+                      value={searchData.location}
+                      onChange={(e) =>
+                        setSearchData({
+                          ...searchData,
+                          location: e.target.value,
+                        })
+                      }
+                      variant="standard"
+                      sx={{
+                        mt: 0.5,
+                        '& .MuiInputBase-root': {
+                          borderRadius: 2,
+                          borderBottom: 'none !important',
+                        },
+                        '& .MuiInput-underline:before, & .MuiInput-underline:after':
+                          {
+                            display: 'none',
+                          },
+                      }}
+                    />
+                  )}
+                />
               </Box>
 
-              {/* Dates Field */}
+              {/* Dates */}
               <Box
                 sx={{
-                  flex: isMobile ? 'auto' : 1,
+                  flex: 1,
                   p: 1,
-                  cursor: 'pointer',
                   borderRight: isMobile ? 'none' : '1px solid',
                   borderBottom: isMobile ? '1px solid' : 'none',
                   borderColor: 'divider',
-                  width: isMobile ? '100%' : 'auto',
-                  borderRadius: isMobile ? 2 : 0,
-                  '&:hover': {
-                    bgcolor: 'grey.50',
-                  },
+                  cursor: 'pointer',
                 }}
                 onClick={(e) => handleFieldClick('dates', e)}
               >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    mb: 0.5,
-                  }}
-                >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <CalendarToday sx={{ fontSize: 20, color: 'error.main' }} />
                   <Typography
                     variant="body2"
@@ -541,16 +461,7 @@ export default function SearchBarComponent({ locations }) {
                     DATES
                   </Typography>
                 </Box>
-                <Typography
-                  variant="body1"
-                  fontWeight="medium"
-                  noWrap
-                  sx={{
-                    color: searchData.checkIn
-                      ? 'text.primary'
-                      : 'text.secondary',
-                  }}
-                >
+                <Typography variant="body1" fontWeight="medium" noWrap>
                   {searchData.checkIn && searchData.checkOut
                     ? `${GetCustomDate(searchData.checkIn)} - ${GetCustomDate(
                         searchData.checkOut
@@ -559,30 +470,18 @@ export default function SearchBarComponent({ locations }) {
                 </Typography>
               </Box>
 
-              {/* Guests Field */}
+              {/* Guests */}
               <Box
                 sx={{
-                  flex: isMobile ? 'auto' : 0.8,
+                  flex: 1,
                   p: 1,
-                  cursor: 'pointer',
-                  width: isMobile ? '100%' : 'auto',
                   borderBottom: isMobile ? '1px solid' : 'none',
                   borderColor: 'divider',
-                  borderRadius: isMobile ? 2 : 0,
-                  '&:hover': {
-                    bgcolor: 'grey.50',
-                  },
+                  cursor: 'pointer',
                 }}
                 onClick={(e) => handleFieldClick('guests', e)}
               >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    mb: 0.5,
-                  }}
-                >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Person sx={{ fontSize: 20, color: 'error.main' }} />
                   <Typography
                     variant="body2"
@@ -603,20 +502,15 @@ export default function SearchBarComponent({ locations }) {
                 onClick={handleSearch}
                 variant="contained"
                 sx={{
-                  minWidth: 'auto',
                   width: isMobile ? '100%' : 56,
                   height: isMobile ? 48 : 56,
                   borderRadius: isMobile ? 2 : 3,
-                  bgcolor: 'primary.main',
+                  bgcolor: 'red',
                   color: 'white',
                   ml: isMobile ? 0 : 1,
                   mt: isMobile ? 1 : 0,
                   fontWeight: 'bold',
-                  background: 'red',
-
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                  },
+                  '&:hover': { transform: 'translateY(-2px)' },
                   transition: 'all 0.3s ease',
                 }}
               >
@@ -627,19 +521,13 @@ export default function SearchBarComponent({ locations }) {
         </Fade>
       </Box>
 
-      {/* Popover for form fields */}
+      {/* Popover for dates & guests */}
       <Popover
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         sx={{
           '& .MuiPopover-paper': {
             borderRadius: 3,
@@ -652,7 +540,6 @@ export default function SearchBarComponent({ locations }) {
         {renderPopoverContent()}
       </Popover>
 
-      {/* Global Styles for Animation */}
       <style jsx global>{`
         @keyframes pulse {
           0% {
@@ -665,6 +552,7 @@ export default function SearchBarComponent({ locations }) {
           }
         }
       `}</style>
+
       <Snackbar
         open={snackbar.open}
         message={snackbar.message}
