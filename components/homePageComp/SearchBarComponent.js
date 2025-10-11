@@ -356,6 +356,7 @@ export default function SearchBarComponent({ locations }) {
               {/* Inline Location */}
               <Box
                 sx={{
+                  width: isMobile ? '100%' : '40%',
                   flex: 1.5,
                   p: 1,
                   borderRight: isMobile ? 'none' : '1px solid',
@@ -441,6 +442,7 @@ export default function SearchBarComponent({ locations }) {
               {/* Dates */}
               <Box
                 sx={{
+                  width: isMobile ? '100%' : '40%',
                   flex: 1,
                   p: 1,
                   borderRight: isMobile ? 'none' : '1px solid',
@@ -473,6 +475,7 @@ export default function SearchBarComponent({ locations }) {
               {/* Guests */}
               <Box
                 sx={{
+                  width: isMobile ? '100%' : '20%',
                   flex: 1,
                   p: 1,
                   borderBottom: isMobile ? '1px solid' : 'none',
