@@ -36,48 +36,21 @@ export const GetCustomDate = (date) => {
   return `${dayStr}/${monthStr}/${year}`;
 };
 
-export function getNextMonthDate(dateString) {
-  const date = new Date(dateString); // local time
-  const nextMonth = date.getMonth() + 1;
+export const getIndiaDate = (offsetDays = 0) => {
+  const now = new Date();
 
-  const lastDayOfNextMonth = new Date(
-    date.getFullYear(),
-    nextMonth + 1,
-    0
-  ).getDate();
+  // Convert to IST timezone (UTC +5:30)
+  const istTime = new Date(
+    now.getTime() + (5.5 * 60 + now.getTimezoneOffset()) * 60 * 1000
+  );
 
-  const newDay = Math.min(date.getDate(), lastDayOfNextMonth);
-  const nextMonthDate = new Date(date.getFullYear(), nextMonth, newDay);
+  // Add offsetDays (0 for today, 1 for tomorrow, etc.)
+  istTime.setDate(istTime.getDate() + offsetDays);
 
-  // Format as YYYY-MM-DD (local)
-  const year = nextMonthDate.getFullYear();
-  const month = String(nextMonthDate.getMonth() + 1).padStart(2, '0');
-  const day = String(nextMonthDate.getDate()).padStart(2, '0');
+  // Format as YYYY-MM-DD in IST, without using UTC-based toISOString()
+  const year = istTime.getFullYear();
+  const month = String(istTime.getMonth() + 1).padStart(2, '0');
+  const day = String(istTime.getDate()).padStart(2, '0');
 
-  return `${year}/${month}/${day}T00:00:00.000Z`;
-}
-
-// get todays date
-export const Get6DateEarly = (date) => {
-  const givenDate = new Date(date);
-
-  // Subtract 5 days
-  const earlierDateObj = new Date(givenDate);
-  earlierDateObj.setDate(givenDate.getDate() - 6);
-
-  // Extract the day, month, and year
-  let today = new Date(earlierDateObj);
-  let day = today.getDate();
-  let month = today.getMonth() + 1;
-  let year = today.getFullYear();
-  if (day.toString().length < 2) {
-    day = '0' + day;
-  }
-  if (month.toString().length < 2) {
-    month = '0' + month;
-  }
-
-  let dateString = day + '-' + month + '-' + year;
-
-  return dateString;
+  return `${year}-${month}-${day}`;
 };

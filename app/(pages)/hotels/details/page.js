@@ -62,6 +62,7 @@ import { calculateReviewStats } from '@/utils/CalculateRating';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context';
 import { ErrorToast, SuccessToast } from '@/utils/GenerateToast';
+import { getIndiaDate } from '@/utils/DateFetcher';
 
 // Mock data - replace with actual API calls
 const hotelData = {
@@ -132,15 +133,12 @@ const hotelData = {
 };
 
 const HotelDetailsPage = () => {
-  const today = new Date();
-  const tomorrow = new Date();
-  tomorrow.setDate(today.getDate() + 1);
   const { auth } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = searchParams.get('id');
-  const checkin = searchParams.get('checkin') || today;
-  const checkout = searchParams.get('checkout') || tomorrow;
+  const checkin = searchParams.get('checkin') || getIndiaDate(0);
+  const checkout = searchParams.get('checkout') || getIndiaDate(1);
   const adults = searchParams.get('adults') || 1;
   const children = searchParams.get('children') || 0;
 
@@ -150,8 +148,8 @@ const HotelDetailsPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedRooms, setSelectedRooms] = useState([]);
   const [bookingData, setBookingData] = useState({
-    checkIn: checkin || today,
-    checkOut: checkout || tomorrow,
+    checkIn: checkin || getIndiaDate(0),
+    checkOut: checkout || getIndiaDate(1),
     adults: parseInt(adults, 10),
     children: parseInt(children, 10),
   });

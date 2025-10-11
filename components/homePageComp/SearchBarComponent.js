@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Search, LocationOn, CalendarToday, Person } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
-import { GetCustomDate } from '@/utils/DateFetcher';
+import { GetCustomDate, getIndiaDate } from '@/utils/DateFetcher';
 import { useRouter } from 'next/navigation';
 
 export default function SearchBarComponent({ locations }) {
@@ -23,16 +23,10 @@ export default function SearchBarComponent({ locations }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const today = new Date();
-  const tomorrow = new Date();
-  tomorrow.setDate(today.getDate() + 1);
-
-  const formatDate = (date) => date.toISOString().split('T')[0];
-
   const [searchData, setSearchData] = useState({
     location: '',
-    checkIn: formatDate(today),
-    checkOut: formatDate(tomorrow),
+    checkIn: getIndiaDate(0), // Today in IST
+    checkOut: getIndiaDate(1), // Tomorrow in IST
     guests: '2 Adults, 0 Children',
   });
 
