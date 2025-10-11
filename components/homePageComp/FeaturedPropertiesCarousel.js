@@ -11,15 +11,47 @@ import {
 } from '@mui/material';
 import { Favorite, FavoriteBorder, LocationOn } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import Slider from 'react-slick';
 import { useAuth } from '@/context';
 import { UpdateData } from '@/utils/ApiFunctions';
 import { ErrorToast, SuccessToast } from '@/utils/GenerateToast';
 import { calculateReviewStats } from '@/utils/CalculateRating';
 
+import Slider from 'react-slick';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+
 export default function FeaturedPropertiesCarousel({ hotels }) {
   const { auth } = useAuth();
   const router = useRouter();
+  // inside your component
+  const theme = useTheme();
+  // match typical breakpoints — adjust if your theme differs
+  const isXs = useMediaQuery(theme.breakpoints.down('sm')); // ~600px
+  const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600-900
+  const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg')); // 900-1200
+  const isLg = useMediaQuery(theme.breakpoints.up('lg')); // >1200
+
+  let slidesToShow = 4;
+  if (isXs) slidesToShow = 1;
+  else if (isSm) slidesToShow = 2; // or 2 if you prefer
+  else if (isMd) slidesToShow = 3;
+  else if (isLg) slidesToShow = 4;
+
+  const sliderSettings = {
+    dots: false,
+    infinite: true,
+    speed: 700,
+    slidesToShow,
+    slidesToScroll: 1,
+    arrows: false,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    // optional fallback responsive (react-slick will also respect this)
+    responsive: [
+      { breakpoint: 1200, settings: { slidesToShow: 2 } },
+      { breakpoint: 800, settings: { slidesToShow: 1 } },
+    ],
+  };
 
   const toggleFavorite = async (propertyId, isFav) => {
     try {
@@ -45,22 +77,6 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
       console.error('toggleFavorite error:', err);
       ErrorToast('Something went wrong');
     }
-  };
-
-  // 🔧 Slick slider settings
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 700,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    arrows: false,
-    autoplay: true,
-    autoplaySpeed: 4000,
-    responsive: [
-      { breakpoint: 1200, settings: { slidesToShow: 2 } },
-      { breakpoint: 800, settings: { slidesToShow: 1 } },
-    ],
   };
 
   return (
