@@ -215,7 +215,7 @@ const HotelDetailsPage = () => {
 
   const handleBooking = async () => {
     if (!auth?.user) {
-      router.push('/login');
+      router.push('/signin');
       return;
     }
 
