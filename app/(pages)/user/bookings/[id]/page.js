@@ -563,7 +563,7 @@ export default function BookingDetails() {
                     </Typography>
                   </Box>
                   <PriceText variant="h3" fontWeight="bold">
-                    ${bookingData.totalPrice}
+                    ₹{bookingData.totalPrice}
                   </PriceText>
                 </Box>
 
