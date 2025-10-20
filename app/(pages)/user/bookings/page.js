@@ -7,28 +7,17 @@ import { parseCookies } from 'nookies';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Chip,
-  CircularProgress,
-  useTheme,
-} from '@mui/material';
-
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { Box, Card, CardContent, Typography, Grid, Chip } from '@mui/material';
+import PhoneIcon from '@mui/icons-material/Phone';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
+import EmailIcon from '@mui/icons-material/Email';
 import HotelIcon from '@mui/icons-material/Hotel';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { GetCustomDate } from '@/utils/DateFetcher';
 import { Preloader } from '@/components/common';
 
 const Page = () => {
   const router = useRouter();
-  const theme = useTheme();
+
   const { auth } = useAuth();
   const userId = auth?.user?.id;
   const [isLoading, setIsLoading] = useState(true);
@@ -119,13 +108,6 @@ const Page = () => {
       >
         <Grid container spacing={2}>
           {filteredData.map((booking) => {
-            const statusColor =
-              booking.status === 'confirmed'
-                ? 'success'
-                : booking.status === 'pending'
-                ? 'warning'
-                : 'error';
-
             return (
               <Grid size={{ xs: 12, sm: 6 }} key={booking.id}>
                 <Link
@@ -134,16 +116,15 @@ const Page = () => {
                 >
                   <Card
                     sx={{
-                      borderRadius: 4,
+                      borderRadius: 3,
                       overflow: 'hidden',
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.08)',
-                      p: 1,
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                      p: 1.5,
                       transition: 'all 0.3s ease',
-                      background: `linear-gradient(145deg, #ffffff, #f8fafc)`,
+                      background: '#fff',
                       position: 'relative',
                       '&:hover': {
-                        transform: 'translateY(-5px)',
-                        boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
+                        boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
                       },
                       '&::before': {
                         content: '""',
@@ -151,32 +132,27 @@ const Page = () => {
                         top: 0,
                         left: 0,
                         width: '100%',
-                        height: 6,
+                        height: 4,
                         background:
                           booking.booking_status === 'Approved'
-                            ? 'green'
+                            ? '#16a34a'
                             : booking.booking_status === 'Booked'
-                            ? 'orange'
-                            : 'red',
+                            ? '#f59e0b'
+                            : '#dc2626',
                       },
                     }}
                   >
-                    <CardContent sx={{ position: 'relative', zIndex: 1 }}>
-                      {/* Top Row */}
+                    <CardContent sx={{ p: 1.5 }}>
+                      {/* Header */}
                       <Box
                         display="flex"
                         justifyContent="space-between"
                         alignItems="center"
-                        mb={1}
+                        mb={0.8}
                       >
-                        <Box display="flex" alignItems="center" gap={0.8}>
-                          <CalendarTodayIcon
-                            sx={{ fontSize: 16, color: 'text.secondary' }}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            {GetCustomDate(booking.createdAt)}
-                          </Typography>
-                        </Box>
+                        <Typography variant="body2" color="text.secondary">
+                          {GetCustomDate(booking.createdAt)}
+                        </Typography>
                         <Chip
                           size="small"
                           label={booking.booking_status || 'Pending'}
@@ -187,74 +163,97 @@ const Page = () => {
                               ? 'warning'
                               : 'error'
                           }
-                          variant="filled"
                           sx={{
+                            fontSize: '0.7rem',
                             fontWeight: 600,
                             textTransform: 'capitalize',
                           }}
                         />
                       </Box>
 
-                      {/* Hotel Info */}
-                      <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-                        <HotelIcon sx={{ color: '#4f46e5' }} />
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight="600"
-                          sx={{ color: 'text.primary' }}
-                        >
-                          {booking?.hotel?.hotel_name || 'Hotel Name'}
-                        </Typography>
-                      </Box>
+                      {/* Hotel Name */}
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight={700}
+                        sx={{ color: '#111827', mb: 0.3 }}
+                        noWrap
+                      >
+                        {booking?.hotel?.hotel_name || 'Hotel Name'}
+                      </Typography>
 
                       {/* Address */}
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontSize: '0.8rem', mb: 1 }}
+                      >
+                        {booking.hotel.hotel_district},{' '}
+                        {booking.hotel.hotel_state}
+                      </Typography>
+
+                      {/* Contact */}
                       <Box
                         display="flex"
-                        alignItems="flex-start"
-                        gap={1}
-                        mb={1.5}
+                        flexDirection="column"
+                        gap={0.4}
+                        mb={1}
                       >
-                        <LocationOnIcon
-                          sx={{
-                            fontSize: 18,
-                            color: 'text.secondary',
-                            mt: 0.3,
-                          }}
-                        />
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ lineHeight: 1.3 }}
-                        >
-                          {booking.hotel.hotel_address_line1},{' '}
-                          {booking.hotel.hotel_address_line2},{' '}
-                          {booking.hotel.hotel_district},{' '}
-                          {booking.hotel.hotel_state}
-                        </Typography>
+                        <Box display="flex" alignItems="center" gap={0.8}>
+                          <PhoneIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontSize: '0.8rem' }}
+                          >
+                            {booking?.hotel?.hotel_phone || 'N/A'}
+                          </Typography>
+                        </Box>
+                        <Box display="flex" alignItems="center" gap={0.8}>
+                          <PhoneIphoneIcon
+                            sx={{ fontSize: 16, color: '#6b7280' }}
+                          />
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontSize: '0.8rem' }}
+                          >
+                            {booking?.hotel?.hotel_alt_phone || 'N/A'}
+                          </Typography>
+                        </Box>
+                        <Box display="flex" alignItems="center" gap={0.8}>
+                          <EmailIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontSize: '0.8rem' }}
+                          >
+                            {booking?.hotel?.hotel_email || 'N/A'}
+                          </Typography>
+                        </Box>
                       </Box>
 
                       {/* Booking ID */}
                       <Box
                         display="flex"
                         alignItems="center"
-                        gap={1}
-                        mb={1.5}
+                        gap={0.5}
+                        mb={1}
                         sx={{
-                          bgcolor: 'rgba(99,102,241,0.1)',
+                          bgcolor: 'rgba(79,70,229,0.05)',
                           borderRadius: 2,
-                          p: 1,
+                          p: 0.8,
                         }}
                       >
                         <Typography
                           sx={{
                             fontWeight: 700,
                             color: '#4f46e5',
-                            letterSpacing: 0.5,
+                            fontSize: '0.8rem',
                           }}
                         >
-                          Booking ID:
+                          ID:
                         </Typography>
-                        <Typography>
+                        <Typography sx={{ fontSize: '0.8rem' }}>
                           BMPGH{booking.booking_id || booking.id || 'N/A'}
                         </Typography>
                       </Box>
@@ -262,32 +261,27 @@ const Page = () => {
                       {/* Dates */}
                       <Grid container spacing={1}>
                         <Grid size={6}>
-                          <Box display="flex" alignItems="center" gap={0.5}>
-                            <AccessTimeIcon
-                              sx={{ fontSize: 18, color: 'text.secondary' }}
-                            />
-                            <Typography variant="body2" color="text.secondary">
-                              <strong>{GetCustomDate(booking.check_in)}</strong>
-                            </Typography>
-                          </Box>
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ fontSize: '0.75rem' }}
+                          >
                             Check-in
                           </Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            {GetCustomDate(booking.check_in)}
+                          </Typography>
                         </Grid>
-
                         <Grid size={6}>
-                          <Box display="flex" alignItems="center" gap={0.5}>
-                            <CheckCircleIcon
-                              sx={{ fontSize: 18, color: 'text.secondary' }}
-                            />
-                            <Typography variant="body2" color="text.secondary">
-                              <strong>
-                                {GetCustomDate(booking.check_out)}
-                              </strong>
-                            </Typography>
-                          </Box>
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ fontSize: '0.75rem' }}
+                          >
                             Check-out
+                          </Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            {GetCustomDate(booking.check_out)}
                           </Typography>
                         </Grid>
                       </Grid>
