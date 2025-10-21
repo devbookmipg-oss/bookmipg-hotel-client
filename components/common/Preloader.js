@@ -12,7 +12,7 @@ const Preloader = () => {
           justifyContent: 'center',
         }}
       >
-        <div class="loader"></div>
+        <div className="loader"></div>
       </Box>
     </>
   );

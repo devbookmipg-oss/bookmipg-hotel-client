@@ -20,7 +20,7 @@ import Slider from 'react-slick';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-export default function FeaturedPropertiesCarousel({ hotels }) {
+export default function FeaturedPropertiesCarousel({ hotels, reviews }) {
   const { auth } = useAuth();
   const router = useRouter();
   // inside your component
@@ -100,10 +100,13 @@ export default function FeaturedPropertiesCarousel({ hotels }) {
       {/* 🧭 Slider container */}
       <Slider {...sliderSettings}>
         {hotels?.slice(0, 10).map((property) => {
+          const myReviews = reviews?.filter((item) => {
+            return item?.hotel_id === property?.documentId;
+          });
+          const ratingValue = calculateReviewStats(myReviews);
           const isFav = property?.online_users?.some(
             (u) => u.documentId === auth?.user?.id
           );
-          const ratingValue = calculateReviewStats(property.reviews);
 
           return (
             <Box key={property.documentId} sx={{ px: 1 }}>

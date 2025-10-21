@@ -57,6 +57,7 @@ import {
   About,
   Amenities,
   HotelHeader,
+  CustomerReviews,
 } from '@/components/hotelDetailsComp';
 import { calculateReviewStats } from '@/utils/CalculateRating';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -161,6 +162,14 @@ const HotelDetailsPage = () => {
 
   const rooms = GetDataList({
     endPoint: 'room-categories',
+  });
+
+  const reviews = GetDataList({
+    endPoint: 'reviews',
+  });
+
+  const myReviews = reviews?.filter((item) => {
+    return item?.hotel_id === id;
   });
 
   const handleBookingChange = (field, value) => {
@@ -284,7 +293,7 @@ const HotelDetailsPage = () => {
 
   return (
     <>
-      {!data || !rooms ? (
+      {!data || !rooms || !reviews ? (
         <Preloader />
       ) : (
         <>
@@ -307,6 +316,7 @@ const HotelDetailsPage = () => {
                     toggleFavorite={toggleFavorite}
                     isMobile={isMobile}
                     isFav={isFav}
+                    myReviews={myReviews}
                   />
 
                   {/* Amenities */}
@@ -710,6 +720,11 @@ const HotelDetailsPage = () => {
                       )}
                     </Paper>
                   </Box>
+                  <CustomerReviews
+                    myReviews={myReviews}
+                    auth={auth}
+                    hotelId={id}
+                  />
                 </Grid>
               </Grid>
             </Container>

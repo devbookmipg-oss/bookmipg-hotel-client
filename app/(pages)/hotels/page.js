@@ -49,6 +49,7 @@ const HotelsPage = () => {
   // Always call hooks at the top — no conditional returns before this
   const hotels = GetDataList({ endPoint: 'hotels' }) || [];
   const locations = GetDataList({ endPoint: 'locations' }) || [];
+  const reviews = GetDataList({ endPoint: 'reviews' }) || [];
 
   const [filteredHotels, setFilteredHotels] = useState([]);
   const [sortOption, setSortOption] = useState('');
@@ -212,7 +213,7 @@ const HotelsPage = () => {
   );
 
   // ✅ Early return *after* all hooks
-  if (!hotels?.length || !locations?.length) {
+  if (!hotels?.length || !locations?.length || !reviews?.length) {
     return <Preloader />;
   }
 
@@ -283,10 +284,14 @@ const HotelsPage = () => {
         <Grid size={{ xs: 12, md: 9 }}>
           <Grid container spacing={3}>
             {filteredHotels.map((property) => {
+              const myReviews = reviews?.filter((item) => {
+                return item?.hotel_id === property?.documentId;
+              });
+              const ratingValue = calculateReviewStats(myReviews);
               const isFav = property?.online_users?.some(
                 (u) => u.documentId === auth?.user?.id
               );
-              const ratingValue = calculateReviewStats(property?.reviews);
+
               return (
                 <Grid key={property.documentId} size={{ xs: 12, sm: 6, md: 4 }}>
                   <Paper

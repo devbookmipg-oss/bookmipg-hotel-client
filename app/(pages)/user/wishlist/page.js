@@ -31,6 +31,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import { GetCustomDate } from '@/utils/DateFetcher';
 import { calculateReviewStats } from '@/utils/CalculateRating';
 import { ErrorToast, SuccessToast } from '@/utils/GenerateToast';
+import { Preloader } from '@/components/common';
 
 const Page = () => {
   const router = useRouter();
@@ -50,6 +51,9 @@ const Page = () => {
 
   const hotels = GetDataList({
     endPoint: 'hotels',
+  });
+  const reviews = GetDataList({
+    endPoint: 'reviews',
   });
   const toggleFavorite = async (propertyId) => {
     try {
@@ -79,18 +83,8 @@ const Page = () => {
     return isFav;
   });
 
-  if (isLoading) {
-    return (
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        height="70vh"
-        sx={{ bgcolor: 'background.default' }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+  if (isLoading || !reviews || !hotels) {
+    return <Preloader />;
   }
 
   if (!filteredData || filteredData.length === 0) {
@@ -130,7 +124,10 @@ const Page = () => {
       >
         <Grid container spacing={2}>
           {filteredData.map((property) => {
-            const ratingValue = calculateReviewStats(property?.reviews);
+            const myReviews = reviews?.filter((item) => {
+              return item?.hotel_id === property?.documentId;
+            });
+            const ratingValue = calculateReviewStats(myReviews);
 
             return (
               <Grid key={property.documentId} size={{ xs: 12, sm: 6, md: 3 }}>

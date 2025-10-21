@@ -2,8 +2,8 @@ import { Box, IconButton, Rating, Typography } from '@mui/material';
 import { Favorite, LocationOn, FavoriteBorder } from '@mui/icons-material';
 import { calculateReviewStats } from '@/utils/CalculateRating';
 
-const HotelHeader = ({ data, toggleFavorite, isMobile, isFav }) => {
-  const ratingValue = calculateReviewStats(data?.reviews);
+const HotelHeader = ({ data, toggleFavorite, isMobile, isFav, myReviews }) => {
+  const ratingValue = calculateReviewStats(myReviews);
   return (
     <>
       <Box sx={{ mb: 4 }}>

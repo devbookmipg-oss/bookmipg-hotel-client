@@ -17,12 +17,15 @@ const Page = () => {
   const hotels = GetDataList({
     endPoint: 'hotels',
   });
+  const reviews = GetDataList({
+    endPoint: 'reviews',
+  });
   return (
     <>
       <Header />
       <SearchBarComponent locations={locations} />
       <QuickCategoriesGrid />
-      <FeaturedPropertiesCarousel hotels={hotels} />
+      <FeaturedPropertiesCarousel hotels={hotels} reviews={reviews} />
       <Footer />
     </>
   );
