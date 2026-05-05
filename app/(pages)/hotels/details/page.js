@@ -82,12 +82,21 @@ const HotelDetailsPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [selectedRooms, setSelectedRooms] = useState([]);
+  const [expandedRooms, setExpandedRooms] = useState([]);
   const [bookingData, setBookingData] = useState({
     checkIn: checkin || getIndiaDate(0),
     checkOut: checkout || getIndiaDate(1),
     adults: parseInt(adults, 10),
     children: parseInt(children, 10),
   });
+
+  const toggleRoomDescription = (roomId) => {
+    setExpandedRooms((prev) =>
+      prev.includes(roomId)
+        ? prev.filter((id) => id !== roomId)
+        : [...prev, roomId],
+    );
+  };
 
   const data = GetSingleData({
     endPoint: 'hotels',
@@ -111,7 +120,7 @@ const HotelDetailsPage = () => {
   };
 
   const isFav = data?.online_users?.some(
-    (u) => u.documentId === auth?.user?.id
+    (u) => u.documentId === auth?.user?.id,
   );
   const toggleFavorite = async () => {
     try {
@@ -145,7 +154,7 @@ const HotelDetailsPage = () => {
 
   const totalPrice = selectedRooms.reduce(
     (total, room) => total + room.total,
-    0
+    0,
   );
 
   const noOfNights = () => {
@@ -214,7 +223,7 @@ const HotelDetailsPage = () => {
 
       if (result) {
         router.push(
-          `/booking-status?status=success&bookingId=${result.id}&bookingDate=${result.createdAt}&checkIn=${result.check_in}&checkOut=${result.check_out}&currentStatus=${result.booking_status}`
+          `/booking-status?status=success&bookingId=${result.id}&bookingDate=${result.createdAt}&checkIn=${result.check_in}&checkOut=${result.check_out}&currentStatus=${result.booking_status}`,
         );
       } else {
         ErrorToast('Booking failed, please try again');
@@ -298,7 +307,7 @@ const HotelDetailsPage = () => {
                                 component="img"
                                 sx={{
                                   width: isMobile ? '100%' : 300,
-                                  height: isMobile ? 200 : 250,
+                                  height: isMobile ? 200 : 278,
                                   objectFit: 'cover',
                                 }}
                                 image={room?.room_image?.url}
@@ -324,11 +333,40 @@ const HotelDetailsPage = () => {
                                   <Typography
                                     variant="body2"
                                     color="text.secondary"
-                                    paragraph
-                                    sx={{ lineHeight: 1.6 }}
+                                    sx={{
+                                      lineHeight: 1.3,
+                                      ...(room?.description &&
+                                      !expandedRooms.includes(room.id)
+                                        ? {
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                          }
+                                        : {}),
+                                    }}
                                   >
                                     {room?.description}
                                   </Typography>
+                                  {room?.description?.length > 180 && (
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        color: '#667eea',
+                                        cursor: 'pointer',
+                                        fontWeight: 600,
+                                        mt: 0.5,
+                                      }}
+                                      onClick={() =>
+                                        toggleRoomDescription(room.id)
+                                      }
+                                    >
+                                      {expandedRooms.includes(room.id)
+                                        ? 'Show less'
+                                        : 'Show more'}
+                                    </Typography>
+                                  )}
                                   <Typography
                                     variant="body2"
                                     color="text.secondary"
@@ -528,7 +566,7 @@ const HotelDetailsPage = () => {
                                 onChange={(e) =>
                                   handleBookingChange(
                                     'checkOut',
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 InputLabelProps={{ shrink: true }}
@@ -561,7 +599,7 @@ const HotelDetailsPage = () => {
                                 onChange={(e) =>
                                   handleBookingChange(
                                     'children',
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 size={isMobile ? 'small' : 'medium'}
