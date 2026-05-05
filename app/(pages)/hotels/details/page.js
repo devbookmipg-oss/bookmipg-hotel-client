@@ -307,7 +307,7 @@ const HotelDetailsPage = () => {
                                 component="img"
                                 sx={{
                                   width: isMobile ? '100%' : 300,
-                                  height: isMobile ? 200 : 278,
+                                  height: isMobile ? 200 : 270,
                                   objectFit: 'cover',
                                 }}
                                 image={room?.room_image?.url}
@@ -430,12 +430,6 @@ const HotelDetailsPage = () => {
                                       >
                                         /night
                                       </Typography>
-                                    </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      color="text.secondary"
-                                    >
-                                      Sleeps {room?.capacity}
                                     </Typography>
                                   </Box>
 

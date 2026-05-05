@@ -14,20 +14,23 @@ const ImageGallery = ({ data }) => {
   ].filter(Boolean);
   return (
     <>
-      {/* Image Gallery */}
-      <Box sx={{ position: 'relative', mb: 4 }}>
-        <Box
-          sx={{
-            height: isMobile ? 300 : 500,
-            backgroundImage: `url(${ImageList[selectedImage]})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            position: 'relative',
-          }}
-        />
+      {' '}
+      <Container maxWidth="xl">
+        {/* Image Gallery */}
+        <Box sx={{ position: 'relative', mb: 4, mt: 3 }}>
+          <Box
+            sx={{
+              height: isMobile ? 300 : 500,
+              backgroundImage: `url(${ImageList[selectedImage]})`,
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              position: 'relative',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
 
-        {/* Thumbnail Gallery */}
-        <Container maxWidth="lg">
+          {/* Thumbnail Gallery */}
+
           <Box
             sx={{
               display: 'flex',
@@ -72,8 +75,8 @@ const ImageGallery = ({ data }) => {
               />
             ))}
           </Box>
-        </Container>
-      </Box>
+        </Box>
+      </Container>
     </>
   );
 };
