@@ -67,7 +67,7 @@ const StyledBottomNavigationAction = styled(BottomNavigationAction)(
       color: theme.palette.error.main,
       fontWeight: 'bold',
     },
-  })
+  }),
 );
 
 export default function Footer() {
@@ -116,6 +116,18 @@ export default function Footer() {
               }}
             >
               About Us
+            </Typography>
+            <Typography
+              component={Link}
+              href="/plans-pricing"
+              sx={{
+                display: 'block',
+                mb: 1,
+                color: 'inherit',
+                textDecoration: 'none',
+              }}
+            >
+              Plans & Pricing
             </Typography>
             <Typography
               component={Link}
