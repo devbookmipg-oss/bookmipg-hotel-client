@@ -14,6 +14,7 @@ import {
   Paper,
   alpha,
   useTheme,
+  Avatar,
 } from '@mui/material';
 import {
   CheckCircle,
@@ -25,6 +26,10 @@ import {
   Star,
   Speed,
   SupportAgent,
+  Phone,
+  Email,
+  LocationOn,
+  Person,
 } from '@mui/icons-material';
 
 // All plans unified display
@@ -196,6 +201,7 @@ const allPlans = [
         rooms: 'Single Outlet',
         price: '₹14,999',
         renewal: '₹10,999',
+        gstIncluded: true, // Added GST included flag
         color: '#10b981',
         gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
         icon: <Restaurant />,
@@ -482,14 +488,14 @@ export default function PlansPage() {
                             <Typography
                               component="span"
                               variant="body2"
-                              sx={{ fontWeight: 400, color: '#64748b' }}
+                              sx={{ fontWeight: 400, color: '#64748b', mb: 2 }}
                             >
-                              {' '}
-                              + GST
+                              {plan.gstIncluded ? ' (Incl. GST)' : ' + GST'}
                             </Typography>
                           </Typography>
                           <Typography variant="body2" sx={{ color: '#94a3b8' }}>
-                            Renewal: {plan.renewal} + 18% GST
+                            Renewal: {plan.renewal}{' '}
+                            {plan.gstIncluded ? '(Incl. GST)' : '+ 18% GST'}
                           </Typography>
                         </Box>
 
@@ -541,6 +547,7 @@ export default function PlansPage() {
                         </Stack>
 
                         <Button
+                          href="/contact"
                           fullWidth
                           variant={plan.popular ? 'contained' : 'outlined'}
                           disableElevation
@@ -710,12 +717,12 @@ export default function PlansPage() {
                               variant="body2"
                               sx={{ fontWeight: 400, color: '#64748b' }}
                             >
-                              {' '}
-                              + GST
+                              {plan.gstIncluded ? ' (Incl. GST)' : ' + GST'}
                             </Typography>
                           </Typography>
                           <Typography variant="body2" sx={{ color: '#94a3b8' }}>
-                            Renewal: {plan.renewal} + 18% GST
+                            Renewal: {plan.renewal}{' '}
+                            {plan.gstIncluded ? '(Incl. GST)' : '+ 18% GST'}
                           </Typography>
                         </Box>
 
@@ -894,6 +901,198 @@ export default function PlansPage() {
               </Grid>
             ))}
           </Grid>
+        </Container>
+      </Box>
+
+      {/* Associate Partner Section - S.K. Mishra */}
+      <Box
+        sx={{
+          bgcolor: 'linear-gradient(135deg, #fefce8 0%, #fef3c7 100%)',
+          py: 10,
+          borderTop: '1px solid #fde68a',
+          borderBottom: '1px solid #fde68a',
+        }}
+      >
+        <Container maxWidth="lg">
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: '48px',
+              overflow: 'hidden',
+              background: 'linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)',
+              border: '1px solid #fde68a',
+              boxShadow: '0 20px 40px -12px rgba(0,0,0,0.08)',
+            }}
+          >
+            <Grid container spacing={0}>
+              {/* Left Side - Profile & Info */}
+              <Grid size={{ xs: 12, md: 5 }}>
+                <Box
+                  sx={{
+                    p: { xs: 4, md: 5 },
+                    background:
+                      'linear-gradient(135deg, #f59e0b10 0%, #f9731610 100%)',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      width: 120,
+                      height: 120,
+                      bgcolor: '#f59e0b',
+                      mb: 3,
+                      boxShadow: '0 20px 30px -10px rgba(245,158,11,0.3)',
+                    }}
+                  >
+                    <Person sx={{ fontSize: 60 }} />
+                  </Avatar>
+                  <Typography
+                    variant="h4"
+                    fontWeight={800}
+                    sx={{
+                      background:
+                        'linear-gradient(135deg, #f59e0b 0%, #dc2626 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      color: 'transparent',
+                      mb: 1,
+                    }}
+                  >
+                    S.K. Mishra
+                  </Typography>
+                  <Chip
+                    label="Associate Partner"
+                    sx={{
+                      bgcolor: '#f59e0b',
+                      color: 'white',
+                      fontWeight: 700,
+                      px: 2,
+                      py: 1.5,
+                      borderRadius: '40px',
+                      mb: 2,
+                      fontSize: '0.8rem',
+                    }}
+                  />
+                  <Typography variant="body2" color="#475569" sx={{ mb: 3 }}>
+                    Your trusted partner for Bookmipg implementations, training,
+                    and ongoing support. Expert guidance for your hospitality
+                    technology journey.
+                  </Typography>
+
+                  {/* <Stack spacing={2} sx={{ width: '100%', mt: 2 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Phone sx={{ color: '#f59e0b', fontSize: 20 }} />
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        +91 98765 43210
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Email sx={{ color: '#f59e0b', fontSize: 20 }} />
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        sk.mishra@bookmipg.com
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <LocationOn sx={{ color: '#f59e0b', fontSize: 20 }} />
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        Mumbai, India
+                      </Typography>
+                    </Box>
+                  </Stack> */}
+                </Box>
+              </Grid>
+
+              {/* Right Side - Why Partner With Us */}
+              <Grid size={{ xs: 12, md: 7 }}>
+                <Box sx={{ p: { xs: 4, md: 5 } }}>
+                  <Typography
+                    variant="h5"
+                    fontWeight={800}
+                    mb={3}
+                    color="#1e293b"
+                  >
+                    Why Partner With S.K. Mishra?
+                  </Typography>
+                  <Stack spacing={2.5}>
+                    {[
+                      '10+ years of hospitality technology expertise',
+                      'Certified Bookmipg implementation specialist',
+                      'Dedicated 24/7 support for all your clients',
+                      'Custom training programs for your team',
+                      'Seamless data migration and setup assistance',
+                    ].map((benefit, idx) => (
+                      <Box
+                        key={idx}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}
+                      >
+                        <CheckCircle sx={{ color: '#10b981', fontSize: 20 }} />
+                        <Typography variant="body1" color="#334155">
+                          {benefit}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+
+                  <Divider sx={{ my: 4 }} />
+
+                  <Typography variant="body2" color="#64748b" sx={{ mb: 3 }}>
+                    Special benefits when you partner with S.K. Mishra:
+                  </Typography>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    <Chip
+                      label="🚀 Priority onboarding"
+                      sx={{
+                        bgcolor: '#fef3c7',
+                        color: '#92400e',
+                        fontWeight: 500,
+                      }}
+                    />
+                    <Chip
+                      label="💎 Exclusive discounts"
+                      sx={{
+                        bgcolor: '#fef3c7',
+                        color: '#92400e',
+                        fontWeight: 500,
+                      }}
+                    />
+                    <Chip
+                      label="🎓 Free team training"
+                      sx={{
+                        bgcolor: '#fef3c7',
+                        color: '#92400e',
+                        fontWeight: 500,
+                      }}
+                    />
+                  </Stack>
+                </Box>
+              </Grid>
+            </Grid>
+          </Paper>
         </Container>
       </Box>
 
